@@ -81,7 +81,13 @@
             <!-- Top Navbar -->
             <header class="top-navbar">
                 <h4 class="m-0 text-dark" style="font-weight: 700; font-size: 18px;">@ViewData["Title"]</h4>
-                
+                <!-- Reloj en Tiempo Real -->
+                <div class="d-flex align-items-center ms-auto me-3 px-3 py-1 bg-light border rounded" style="font-size: 13px; font-weight: 500; font-family: monospace; color: #555; height: 36px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-2 text-primary" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                    </svg>
+                    <span id="realtime-clock">--:--:--</span>
+                </div>
                 <div class="top-navbar-user">
                     <div class="text-end">
                         <div class="user-name" style="font-size: 13px; font-weight: 600;">@Context.Session.GetString("UserName")</div>
@@ -121,5 +127,19 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        function updateClock() {
+            const clockEl = document.getElementById('realtime-clock');
+            if (clockEl) {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                clockEl.textContent = hours + ":" + minutes + ":" + seconds;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // Carga inicial
+    </script>
 </body>
 </html>

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-// Detectar y ajustar la raíz del proyecto si se ejecuta directamente el .exe (Documento actual)
 string contentRoot = Directory.GetCurrentDirectory();
 var baseDir = AppContext.BaseDirectory;
 var dir = new DirectoryInfo(baseDir);
@@ -18,14 +17,12 @@ if (dir != null)
     contentRoot = dir.FullName;
 }
 
-// Configurar entorno si no está definido
 bool isDirectRun = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 if (isDirectRun)
 {
     Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 }
 
-// Leer URL del perfil en launchSettings.json para usarlo si se ejecuta directamente
 string? launchUrl = null;
 if (isDirectRun)
 {
@@ -58,7 +55,6 @@ if (!string.IsNullOrEmpty(launchUrl))
     builder.WebHost.UseUrls(launchUrl.Split(';'));
 }
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<EscuelaDatabaseContext>(options => 
@@ -81,7 +77,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -102,14 +97,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-// Check if database exists and seed/create it
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<EscuelaDatabaseContext>();
-        // EnsureCreated creates the database and executes HasData seeding
         context.Database.EnsureCreated();
     }
     catch (Exception ex)
