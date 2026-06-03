@@ -1,0 +1,148 @@
+@model despachoAeronave.Models.Despacho
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Generar Despacho de Vuelo";
+    var selectedFlight = ViewBag.SelectedFlight as despachoAeronave.Models.Vuelo;
+    var currentUserName = Context.Session.GetString("UserName") ?? "";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card card-premium">
+            <div class="card-header">
+                <h5 class="m-0" style="font-weight: 700; font-size: 16px; color: #1e293b;">Planificador de Despacho de Vuelo</h5>
+                <small class="text-muted">Cálculo de combustible, ruta de navegación y análisis meteorológico (METAR)</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
+
+                    <!-- Step 1: Flight Selection -->
+                    <div class="row mb-4 bg-light p-3 rounded" style="margin-left: 0; margin-right: 0;">
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="VueloId" class="form-label fw-bold text-primary">Vuelo Programado</label>
+                            <select asp-for="VueloId" class="form-select" asp-items="ViewBag.VueloId" id="vueloSelect" style="border-radius: 8px;" required>
+                                <option value="">-- Seleccionar Vuelo --</option>
+                            </select>
+                            <span asp-validation-for="VueloId" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mt-4" id="flightInfoPanel">
+                                @if (selectedFlight != null)
+                                {
+                                    <div class="p-2 border rounded bg-white" style="font-size: 13px;">
+                                        <strong>Matrícula:</strong> @(selectedFlight.Aeronave?.Matricula ?? "No Asignada") (@selectedFlight.Aeronave?.Modelo) <br />
+                                        <strong>Ruta:</strong> @selectedFlight.Origen a @selectedFlight.Destino <br />
+                                        <strong>Salida:</strong> @selectedFlight.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted py-2" style="font-size: 13px;">
+                                        Seleccione un vuelo para visualizar sus datos de itinerario y aeronave.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Fuel and Weight Parameters -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CombustibleRequerido" class="form-label fw-semibold">Combustible Requerido (kg)</label>
+                            <div class="input-group">
+                                <input asp-for="CombustibleRequerido" type="number" class="form-control" placeholder="Ej: 8500" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="CombustibleRequerido" class="text-danger" style="font-size: 12px;"></span>
+                            <small class="text-muted" style="font-size: 11px;">Incluye Combustible de Ruta, Reserva y Combustible Alterno.</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CargaPago" class="form-label fw-semibold">Carga de Pago (kg)</label>
+                            <div class="input-group">
+                                <input asp-for="CargaPago" type="number" class="form-control" placeholder="Ej: 14200" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="CargaPago" class="text-danger" style="font-size: 12px;"></span>
+                            <small class="text-muted" style="font-size: 11px;">Peso total estimado de pasajeros, equipaje y carga comercial.</small>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Route and Meteorological Data -->
+                    <div class="mb-3">
+                        <label asp-for="Ruta" class="form-label fw-semibold">Ruta ATC (Navegación)</label>
+                        <input asp-for="Ruta" class="form-control" placeholder="Ej: EZE UT312 SCL" style="border-radius: 8px;" required />
+                        <span asp-validation-for="Ruta" class="text-danger" style="font-size: 12px;"></span>
+                        <small class="text-muted" style="font-size: 11px;">Defina aerovías, puntos de reporte y aeropuertos alternos.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ClimaReporte" class="form-label fw-semibold">Reporte Meteorológico (METAR / TAF)</label>
+                        <textarea asp-for="ClimaReporte" rows="3" class="form-control font-monospace" placeholder="SABE 010600Z 12008KT 9999 FEW030 18/14 Q1015..." style="border-radius: 8px; font-size: 13px;" required></textarea>
+                        <span asp-validation-for="ClimaReporte" class="text-danger" style="font-size: 12px;"></span>
+                        <small class="text-muted" style="font-size: 11px;">Copie los reportes de clima vigentes para origen, destino y alterno.</small>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DespachadorNombre" class="form-label fw-semibold">Nombre del Despachador Autorizado</label>
+                            <input asp-for="DespachadorNombre" class="form-control" value="@currentUserName" style="border-radius: 8px;" required />
+                            <span asp-validation-for="DespachadorNombre" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Observaciones" class="form-label fw-semibold">Observaciones / Desvíos de Seguridad</label>
+                            <input asp-for="Observaciones" class="form-control" placeholder="Ej: Operación estándar sobre rutas normales." style="border-radius: 8px;" />
+                            <span asp-validation-for="Observaciones" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                            Aprobar y Despachar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            $('#vueloSelect').change(function() {
+                var flightId = $(this).val();
+                if (flightId) {
+                    $.ajax({
+                        url: '@Url.Action("GetFlightDetailsJson", "Despachos")' + '?id=' + flightId,
+                        type: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                var html = '<div class="p-2 border rounded bg-white" style="font-size: 13px;">' +
+                                    '<strong>Matrícula:</strong> ' + data.matricula + ' (' + data.modelo + ')<br />' +
+                                    '<strong>Ruta:</strong> ' + data.origen + ' a ' + data.destino + '<br />' +
+                                    '<strong>Salida:</strong> ' + data.salida +
+                                    '</div>';
+                                $('#flightInfoPanel').html(html);
+                            }
+                        },
+                        error: function() {
+                            $('#flightInfoPanel').html('<div class="text-danger py-2" style="font-size: 13px;">Error al obtener itinerario.</div>');
+                        }
+                    });
+                } else {
+                    $('#flightInfoPanel').html('<div class="text-muted py-2" style="font-size: 13px;">Seleccione un vuelo para visualizar sus datos de itinerario y aeronave.</div>');
+                }
+            });
+        });
+    </script>
+}

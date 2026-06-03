@@ -1,0 +1,91 @@
+@model despachoAeronave.Models.Vuelo
+@{
+    ViewData["Title"] = "Editar Vuelo";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-premium">
+            <div class="card-header">
+                <h5 class="m-0" style="font-weight: 700; font-size: 16px; color: #1e293b;">Editar Vuelo @Model.NumeroVuelo</h5>
+                <small class="text-muted">Actualice el itinerario o reasigne la aeronave asignada para este vuelo</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NumeroVuelo" class="form-label fw-semibold">Número de Vuelo</label>
+                            <input asp-for="NumeroVuelo" class="form-control" style="border-radius: 8px;" required />
+                            <span asp-validation-for="NumeroVuelo" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AeronaveId" class="form-label fw-semibold">Aeronave Asignada</label>
+                            <select asp-for="AeronaveId" class="form-select" asp-items="ViewBag.AeronaveId" style="border-radius: 8px;" required></select>
+                            <span asp-validation-for="AeronaveId" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Origen" class="form-label fw-semibold">Origen (Aeropuerto)</label>
+                            <input asp-for="Origen" class="form-control" style="border-radius: 8px;" required />
+                            <span asp-validation-for="Origen" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Destino" class="form-label fw-semibold">Destino (Aeropuerto)</label>
+                            <input asp-for="Destino" class="form-control" style="border-radius: 8px;" required />
+                            <span asp-validation-for="Destino" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaHoraSalida" class="form-label fw-semibold">Fecha y Hora de Salida</label>
+                            <input asp-for="FechaHoraSalida" type="datetime-local" class="form-control" value="@Model.FechaHoraSalida.ToString("yyyy-MM-ddTHH:mm")" style="border-radius: 8px;" required />
+                            <span asp-validation-for="FechaHoraSalida" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaHoraLlegada" class="form-label fw-semibold">Fecha y Hora de Llegada</label>
+                            <input asp-for="FechaHoraLlegada" type="datetime-local" class="form-control" value="@Model.FechaHoraLlegada.ToString("yyyy-MM-ddTHH:mm")" style="border-radius: 8px;" required />
+                            <span asp-validation-for="FechaHoraLlegada" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Estado" class="form-label fw-semibold">Estado del Vuelo</label>
+                            <select asp-for="Estado" class="form-select" style="border-radius: 8px;">
+                                <option value="Programado">Programado</option>
+                                <option value="En Vuelo">En Vuelo</option>
+                                <option value="Aterrizado">Aterrizado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                            Actualizar Operación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

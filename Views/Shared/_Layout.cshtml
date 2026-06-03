@@ -1,0 +1,125 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Aerolíneas Argentinas</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-circle" style="background: rgba(255,255,255,0.1); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-airplane-fill" viewBox="0 0 16 16" style="transform: rotate(45deg);">
+                        <path d="M6.428 1.151C6.708.591 7.303 0 8 0s1.293.592 1.572 1.151C9.892 1.786 10 2.412 10 3v3.697l2.5 1.5v1.5L10 8.5v3.803l1.5 1.5v1.5L8 15.5l-3.5.803v-1.5L6 12.303V8.5L3.5 9.697v-1.5l2.5-1.5V3c0-.588.108-1.214.357-1.849L6.428 1.151Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="m-0 text-white" style="font-size: 14px; font-weight: 700;">Aerolíneas</h5>
+                    <small class="text-muted" style="font-size: 10px; text-transform: uppercase;">Gestión de Vuelos</small>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Home")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Inicio / Métricas</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Aeronaves")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Aeronaves" ? "active" : "")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        </svg>
+                        <span>Flota (Aeronaves)</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Vuelos")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vuelos" ? "active" : "")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Vuelos Programados</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="@Url.Action("Index", "Despachos")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Despachos" ? "active" : "")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>Despacho de Vuelos</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div>Conexión: EscuelaDB</div>
+                <div style="font-size: 10px; opacity: 0.7;">Mod. Despacho Aeronave v1.0</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <h4 class="m-0 text-dark" style="font-weight: 700; font-size: 18px;">@ViewData["Title"]</h4>
+                
+                <div class="top-navbar-user">
+                    <div class="text-end">
+                        <div class="user-name" style="font-size: 13px; font-weight: 600;">@Context.Session.GetString("UserName")</div>
+                        <div class="user-role text-muted" style="font-size: 11px;">@Context.Session.GetString("UserRole")</div>
+                    </div>
+                    <div class="user-avatar">
+                        @{
+                            string initials = "U";
+                            string? fullName = Context.Session.GetString("UserName");
+                            if (!string.IsNullOrEmpty(fullName))
+                            {
+                                var parts = fullName.Split(' ');
+                                if (parts.Length > 0 && !string.IsNullOrEmpty(parts[0])) initials = parts[0][0].ToString();
+                            }
+                        }
+                        @initials
+                    </div>
+                    <div class="ms-2">
+                        <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                                Salir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Container -->
+            <div class="page-container">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

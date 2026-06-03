@@ -1,0 +1,94 @@
+@model IEnumerable<despachoAeronave.Models.Despacho>
+@{
+    ViewData["Title"] = "Historial de Despachos";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-premium">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="m-0" style="font-weight: 700; font-size: 16px; color: #1e293b;">Despachos Realizados</h5>
+                    <small class="text-muted">Despachos de aeronave autorizados en el sistema</small>
+                </div>
+                <a href="@Url.Action("Create")" class="btn btn-primary btn-sm px-3" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                    Generar Nuevo Despacho
+                </a>
+            </div>
+            <div class="table-responsive p-0">
+                <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 px-4" style="color: #64748b; font-weight: 600;">ID</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Vuelo</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Ruta</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Despachador</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Combustible</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Carga de Pago</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Fecha y Hora</th>
+                            <th class="py-3 text-end px-4" style="color: #64748b; font-weight: 600; width: 160px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="py-3 px-4 fw-semibold text-muted">
+                                        #@item.Id
+                                    </td>
+                                    <td>
+                                        @if (item.Vuelo != null)
+                                        {
+                                            <span class="fw-bold text-dark">@item.Vuelo.NumeroVuelo</span>
+                                            <span class="text-muted d-block" style="font-size: 11px;">
+                                                @(item.Vuelo.Aeronave != null ? item.Vuelo.Aeronave.Matricula : "Sin Matrícula")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Desconocido</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@item.Ruta</div>
+                                        <span class="text-muted d-block" style="font-size: 11px;">
+                                            @if (item.Vuelo != null)
+                                            {
+                                                <span>@item.Vuelo.Origen.Split(' ')[0] a @item.Vuelo.Destino.Split(' ')[0]</span>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @item.DespachadorNombre
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">@item.CombustibleRequerido.ToString("N0") kg</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">@item.CargaPago.ToString("N0") kg</span>
+                                    </td>
+                                    <td>
+                                        @item.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td class="text-end px-4">
+                                        <a href="@Url.Action("Details", new { id = item.Id })" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;">
+                                            Ver Despacho
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No se han realizado despachos de vuelo.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

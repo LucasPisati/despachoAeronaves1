@@ -1,0 +1,388 @@
+/* Design System & Premium Aesthetics for Aerolíneas Argentinas */
+
+:root {
+  --primary-color: #0076ff;
+  --primary-hover: #0056cc;
+  --secondary-color: #f0f4f9;
+  --bg-gradient-start: #eef5fc;
+  --bg-gradient-end: #d4e8fc;
+  --card-shadow: 0 10px 30px rgba(0, 118, 255, 0.08);
+  --dark-text: #2c3e50;
+  --light-text: #7f8c8d;
+  --border-radius-lg: 16px;
+  --border-radius-sm: 8px;
+  --transition-speed: 0.3s;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--dark-text);
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Background for Login View */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eef5fc 0%, #d4e8fc 100%);
+  min-height: 100vh;
+}
+
+/* Login Card styling based on Figma */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+  border: none;
+  overflow: hidden;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.login-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 118, 255, 0.12);
+}
+
+.login-header {
+  background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%);
+  padding: 30px 20px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.login-header .logo-container {
+  background-color: rgba(255, 255, 255, 0.15);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px auto;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.5s ease;
+}
+
+.login-header:hover .logo-container {
+  transform: rotate(45deg) scale(1.05);
+}
+
+.login-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  letter-spacing: -0.5px;
+}
+
+.login-header p {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.85;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.login-body-content {
+  padding: 30px 35px;
+}
+
+.login-body-content label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--dark-text);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Custom Input Groups */
+.input-group-custom {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group-custom .input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--light-text);
+  z-index: 10;
+  transition: color var(--transition-speed);
+}
+
+.input-group-custom .form-control {
+  padding-left: 42px;
+  height: 48px;
+  border-radius: var(--border-radius-sm);
+  border: 1.5px solid #e2e8f0;
+  font-size: 14px;
+  color: var(--dark-text);
+  background-color: #f8fafc;
+  transition: all var(--transition-speed);
+}
+
+.input-group-custom .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(0, 118, 255, 0.1);
+  background-color: #ffffff;
+}
+
+.input-group-custom .form-control:focus + .input-icon {
+  color: var(--primary-color);
+}
+
+/* Blue login button */
+.btn-login {
+  background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  height: 48px;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-speed);
+  box-shadow: 0 4px 15px rgba(0, 118, 255, 0.2);
+}
+
+.btn-login:hover {
+  background: linear-gradient(135deg, #0088ff 0%, #0066ee 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 118, 255, 0.3);
+  color: #ffffff;
+}
+
+.btn-login:active {
+  transform: translateY(1px);
+}
+
+.login-footer-links {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.login-footer-links a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-speed);
+}
+
+.login-footer-links a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* Watermarks and Brand Details */
+.login-watermark {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.login-watermark-bg {
+  position: absolute;
+  bottom: 25px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(0, 118, 255, 0.15);
+  pointer-events: none;
+}
+
+/* Inner App Dashboard Design */
+.main-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #1e293b;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+
+.sidebar-header {
+  padding: 24px;
+  background-color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding: 20px 14px;
+  list-style: none;
+  margin: 0;
+}
+
+.sidebar-item {
+  margin-bottom: 6px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all var(--transition-speed);
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: #ffffff;
+}
+
+.sidebar-link.active {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 118, 255, 0.2);
+}
+
+.sidebar-footer {
+  padding: 20px;
+  background-color: #0f172a;
+  border-top: 1px solid #334155;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+}
+
+.top-navbar {
+  height: 70px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.top-navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-navbar-user .user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.page-container {
+  padding: 30px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Card Improvements */
+.dashboard-stat-card {
+  border: none;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition-speed);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Forms and Badges */
+.card-premium {
+  border: none;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+  background: #ffffff;
+}
+
+.card-premium .card-header {
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 20px 24px;
+}
+
+.badge-custom {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.badge-success-light {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-warning-light {
+  background-color: #fef9c3;
+  color: #a16207;
+}
+
+.badge-danger-light {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge-primary-light {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Navigation items reset for custom layout */
+.navbar-brand-custom {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

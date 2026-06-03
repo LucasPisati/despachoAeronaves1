@@ -1,0 +1,199 @@
+@model despachoAeronave.Models.Despacho
+@{
+    ViewData["Title"] = "Despacho de Vuelo #" + Model.Id;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Print Button and Navigation -->
+        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm px-3" style="border-radius: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Volver al listado
+            </a>
+            <button onclick="window.print();" class="btn btn-primary btn-sm px-3" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir Release
+            </button>
+        </div>
+
+        <!-- Release Document Card -->
+        <div class="card card-premium p-5" id="flightReleaseDoc" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+            <!-- Document Header -->
+            <div class="row align-items-center border-bottom pb-4 mb-4">
+                <div class="col-sm-6 d-flex align-items-center gap-2">
+                    <div style="background: #0076ff; width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-airplane-fill" viewBox="0 0 16 16" style="transform: rotate(45deg);">
+                            <path d="M6.428 1.151C6.708.591 7.303 0 8 0s1.293.592 1.572 1.151C9.892 1.786 10 2.412 10 3v3.697l2.5 1.5v1.5L10 8.5v3.803l1.5 1.5v1.5L8 15.5l-3.5.803v-1.5L6 12.303V8.5L3.5 9.697v-1.5l2.5-1.5V3c0-.588.108-1.214.357-1.849L6.428 1.151Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="m-0 text-dark fw-bold" style="font-size: 20px; letter-spacing: -0.5px;">Aerolíneas Argentinas</h4>
+                        <span class="text-muted uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">DESPACHO OPERATIVO DE VUELO</span>
+                    </div>
+                </div>
+                <div class="col-sm-6 text-sm-end">
+                    <h5 class="text-primary fw-bold m-0" style="font-size: 18px;">FLIGHT RELEASE DOCUMENT</h5>
+                    <span class="text-muted" style="font-size: 12px;">ID Sistema: #@Model.Id</span>
+                </div>
+            </div>
+
+            <!-- Meta Details Grid -->
+            <div class="row mb-4">
+                <div class="col-sm-3 mb-2">
+                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Número de Vuelo</span>
+                    <strong class="text-dark" style="font-size: 16px;">@(Model.Vuelo?.NumeroVuelo ?? "N/D")</strong>
+                </div>
+                <div class="col-sm-3 mb-2">
+                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Matrícula / Tipo</span>
+                    <strong class="text-dark" style="font-size: 16px;">
+                        @(Model.Vuelo?.Aeronave?.Matricula ?? "N/A") 
+                        <span class="text-muted fw-normal" style="font-size: 12px;">(@(Model.Vuelo?.Aeronave?.Modelo ?? "N/A"))</span>
+                    </strong>
+                </div>
+                <div class="col-sm-3 mb-2">
+                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Itinerario</span>
+                    <strong class="text-dark" style="font-size: 16px;">
+                        @(Model.Vuelo?.Origen.Split(' ')[0]) a @(Model.Vuelo?.Destino.Split(' ')[0])
+                    </strong>
+                </div>
+                <div class="col-sm-3 mb-2">
+                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Fecha de Creación</span>
+                    <strong class="text-dark" style="font-size: 16px;">@Model.FechaCreacion.ToString("dd MMM yyyy, HH:mm")</strong>
+                </div>
+            </div>
+
+            <!-- Segment Split Section -->
+            <div class="row mb-4 border rounded p-3 bg-light m-0" style="font-size: 13px;">
+                <div class="col-sm-6 border-end">
+                    <h6 class="text-primary fw-bold mb-2">ORIGEN / DEPARTURE</h6>
+                    <strong>Aeropuerto:</strong> @(Model.Vuelo?.Origen) <br />
+                    <strong>Hora de Salida Programada:</strong> @(Model.Vuelo?.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm"))
+                </div>
+                <div class="col-sm-6 ps-sm-4">
+                    <h6 class="text-primary fw-bold mb-2">DESTINO / ARRIVAL</h6>
+                    <strong>Aeropuerto:</strong> @(Model.Vuelo?.Destino) <br />
+                    <strong>Hora de Llegada Programada:</strong> @(Model.Vuelo?.FechaHoraLlegada.ToString("dd/MM/yyyy HH:mm"))
+                </div>
+            </div>
+
+            <!-- Load and Fuel Log -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border p-3">
+                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">PARÁMETROS DE COMBUSTIBLE</h6>
+                        <table class="table table-sm table-borderless m-0" style="font-size: 13px;">
+                            <tr>
+                                <td>Combustible de Ruta + Reservas:</td>
+                                <td class="text-end fw-bold">@Model.CombustibleRequerido.ToString("N0") kg</td>
+                            </tr>
+                            <tr>
+                                <td>Carga Máxima de Tanques (Aprox):</td>
+                                <td class="text-end text-muted">20,800 kg</td>
+                            </tr>
+                            <tr class="border-top pt-2">
+                                <td class="fw-bold">TOTAL MÍNIMO REQUERIDO (RAMP):</td>
+                                <td class="text-end fw-bold text-success" style="font-size: 15px;">@Model.CombustibleRequerido.ToString("N0") kg</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border p-3">
+                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">PARÁMETROS DE CARGA Y PASAJEROS</h6>
+                        <table class="table table-sm table-borderless m-0" style="font-size: 13px;">
+                            <tr>
+                                <td>Carga de Pago Comercial (Catering, equipaje, Pax):</td>
+                                <td class="text-end fw-bold">@Model.CargaPago.ToString("N0") kg</td>
+                            </tr>
+                            <tr>
+                                <td>Capacidad de Pasajeros de la Aeronave:</td>
+                                <td class="text-end">@(Model.Vuelo?.Aeronave?.CapacidadPasajeros ?? 0) PAX</td>
+                            </tr>
+                            <tr class="border-top pt-2">
+                                <td class="fw-bold">TOTAL ESTIMATED PAYLOAD (ZFW):</td>
+                                <td class="text-end fw-bold text-primary" style="font-size: 15px;">@Model.CargaPago.ToString("N0") kg</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Route and ATC Clearance -->
+            <div class="border rounded p-3 mb-4">
+                <h6 class="text-primary fw-bold mb-2">RUTA ATC AUTORIZADA</h6>
+                <div class="bg-light p-3 border rounded text-dark font-monospace text-uppercase" style="font-size: 14px; letter-spacing: 0.5px;">
+                    @Model.Ruta
+                </div>
+            </div>
+
+            <!-- Meteorological Briefing -->
+            <div class="border rounded p-3 mb-4">
+                <h6 class="text-primary fw-bold mb-2">INFORMACIÓN METEOROLÓGICA (METAR / TAF)</h6>
+                <div class="bg-dark text-white p-3 border rounded font-monospace text-uppercase" style="font-size: 12px; line-height: 1.6; letter-spacing: 0.5px;">
+                    @Model.ClimaReporte
+                </div>
+            </div>
+
+            <!-- Remarks -->
+            @if (!string.IsNullOrEmpty(Model.Observaciones))
+            {
+                <div class="border rounded p-3 mb-4">
+                    <h6 class="text-primary fw-bold mb-1">OBSERVACIONES ADICIONALES</h6>
+                    <p class="text-muted m-0" style="font-size: 13px;">@Model.Observaciones</p>
+                </div>
+            }
+
+            <!-- Dispatcher signature details -->
+            <div class="row mt-5 pt-4 border-top">
+                <div class="col-sm-6">
+                    <span class="text-muted d-block mb-4" style="font-size: 11px; text-transform: uppercase;">Estado de Firmas y Validación</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="badge bg-success py-2 px-3 fw-bold" style="border-radius: 20px;">
+                            DESPACHO AUTORIZADO
+                        </div>
+                        <small class="text-muted">Autorización Electrónica</small>
+                    </div>
+                </div>
+                <div class="col-sm-6 text-sm-end">
+                    <div class="d-inline-block text-center border-top pt-2" style="width: 250px;">
+                        <span class="font-monospace text-dark d-block" style="font-size: 14px; font-weight: 700;">@Model.DespachadorNombre</span>
+                        <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Despachador de Vuelo / Dispatcher</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style media="print">
+    /* Hide layout and sidebar elements when printing */
+    .sidebar, .top-navbar, .no-print, header, footer {
+        display: none !important;
+    }
+    .content-area {
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .page-container {
+        padding: 0 !important;
+    }
+    #flightReleaseDoc {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    body {
+        background: white !important;
+        color: black !important;
+    }
+</style>

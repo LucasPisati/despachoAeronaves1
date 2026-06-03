@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Acceso Denegado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card border-0 shadow-lg p-5 bg-white rounded">
+                <div class="text-danger mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-shield-slash-fill" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M1.093 3.093c-.496.496-.907 1.047-1.093 1.636V8c0 5.017 4.24 7.632 7.74 8a12 12 0 0 0 .26.02L8 16c3.837-.367 8-3.5 8-8V4.729c-.067-.201-.157-.393-.27-.573l-1.082 1.082V8c0 3.864-3.197 6.425-6.648 6.776V9.093l-6.907-6.9zm.655.655 8.907 8.907c1.782-1.026 3.324-2.8 4.093-5.26H9.093l-6.907-6.9-.438.438z"/>
+                    </svg>
+                </div>
+                <h1 class="h3 mb-3 text-gray-800">Acceso Denegado</h1>
+                <p class="text-muted mb-4">No tienes los permisos requeridos para acceder a este módulo. Este espacio está reservado únicamente para personal autorizado.</p>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary px-4 py-2" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                    Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

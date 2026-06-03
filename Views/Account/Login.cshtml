@@ -1,0 +1,103 @@
+@{
+    Layout = null;
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión - Aerolíneas Argentinas</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Standalone page adjustments for background and layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="login-body">
+
+    <div class="login-card">
+        <!-- Header from Figma -->
+        <div class="login-header">
+            <div class="logo-container">
+                <!-- Airplane SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-airplane-fill" viewBox="0 0 16 16" style="transform: rotate(45deg);">
+                    <path d="M6.428 1.151C6.708.591 7.303 0 8 0s1.293.592 1.572 1.151C9.892 1.786 10 2.412 10 3v3.697l2.5 1.5v1.5L10 8.5v3.803l1.5 1.5v1.5L8 15.5l-3.5.803v-1.5L6 12.303V8.5L3.5 9.697v-1.5l2.5-1.5V3c0-.588.108-1.214.357-1.849L6.428 1.151Z"/>
+                </svg>
+            </div>
+            <h2>Aerolíneas Argentinas</h2>
+            <p>Sistema de Gestión Operacional</p>
+        </div>
+
+        <!-- Card Body -->
+        <div class="login-body-content">
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                <!-- Validation Summary -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger py-2 px-3 mb-4" style="font-size: 13px; border-radius: 8px;">
+                        <div asp-validation-summary="All" class="text-danger list-unstyled m-0"></div>
+                    </div>
+                }
+
+                <!-- Usuario input -->
+                <div class="form-group mb-3">
+                    <label for="username">Usuario</label>
+                    <div class="input-group-custom">
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Ingrese su usuario" required autocomplete="username" />
+                        <div class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                                <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contraseña input -->
+                <div class="form-group mb-4">
+                    <label for="password">Contraseña</label>
+                    <div class="input-group-custom">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required autocomplete="current-password" />
+                        <div class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-login w-100">
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <div class="login-footer-links">
+                <a href="#" onclick="alert('Consulte con el administrador de sistemas para recuperar su clave.'); return false;">¿Olvidó su contraseña?</a>
+            </div>
+            
+            <div class="login-watermark">
+                Desarrollado por Grupo Operaciones v1.0.0
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Background Watermark -->
+    <div class="login-watermark-bg">
+        Módulo Despacho de Vuelos
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

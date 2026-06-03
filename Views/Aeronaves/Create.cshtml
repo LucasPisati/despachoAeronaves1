@@ -1,0 +1,63 @@
+@model despachoAeronave.Models.Aeronave
+@{
+    ViewData["Title"] = "Registrar Aeronave";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card card-premium">
+            <div class="card-header">
+                <h5 class="m-0" style="font-weight: 700; font-size: 16px; color: #1e293b;">Nueva Aeronave</h5>
+                <small class="text-muted">Complete los datos técnicos de la aeronave para registrarla en el sistema</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Matricula" class="form-label fw-semibold">Matrícula</label>
+                        <input asp-for="Matricula" class="form-control" placeholder="Ej: LV-FCR" style="border-radius: 8px;" required />
+                        <span asp-validation-for="Matricula" class="text-danger" style="font-size: 12px;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Modelo" class="form-label fw-semibold">Modelo / Tipo de Aeronave</label>
+                        <input asp-for="Modelo" class="form-control" placeholder="Ej: Boeing 737-800" style="border-radius: 8px;" required />
+                        <span asp-validation-for="Modelo" class="text-danger" style="font-size: 12px;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CapacidadPasajeros" class="form-label fw-semibold">Capacidad de Pasajeros</label>
+                        <input asp-for="CapacidadPasajeros" type="number" class="form-control" placeholder="Ej: 170" style="border-radius: 8px;" required />
+                        <span asp-validation-for="CapacidadPasajeros" class="text-danger" style="font-size: 12px;"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Estado" class="form-label fw-semibold">Estado Inicial</label>
+                        <select asp-for="Estado" class="form-select" style="border-radius: 8px;">
+                            <option value="Activa">Activa / Disponible</option>
+                            <option value="Mantenimiento">En Mantenimiento</option>
+                            <option value="Inactiva">Inactiva / Fuera de Servicio</option>
+                        </select>
+                        <span asp-validation-for="Estado" class="text-danger" style="font-size: 12px;"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                            Guardar Registro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

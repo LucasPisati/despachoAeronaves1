@@ -1,0 +1,55 @@
+@model despachoAeronave.Models.Vuelo
+@{
+    ViewData["Title"] = "Eliminar Vuelo";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card card-premium border-danger">
+            <div class="card-header bg-danger bg-opacity-10 text-danger">
+                <h5 class="m-0" style="font-weight: 700; font-size: 16px;">¿Confirmar cancelación / eliminación?</h5>
+                <small class="text-muted text-danger">Esta acción eliminará el itinerario y todos los despachos de vuelo vinculados.</small>
+            </div>
+            <div class="card-body p-4">
+                <p class="mb-4">Está a punto de eliminar el siguiente vuelo programado:</p>
+                
+                <table class="table table-bordered mb-4">
+                    <tr>
+                        <th class="bg-light w-30">Vuelo</th>
+                        <td class="fw-bold">@Model.NumeroVuelo</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Ruta</th>
+                        <td>@Model.Origen a @Model.Destino</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Aeronave</th>
+                        <td>@(Model.Aeronave != null ? Model.Aeronave.Matricula : "No asignada")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Salida</th>
+                        <td>@Model.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Llegada</th>
+                        <td>@Model.FechaHoraLlegada.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                </table>
+
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4" style="border-radius: 8px;">
+                            Confirmar Eliminación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
