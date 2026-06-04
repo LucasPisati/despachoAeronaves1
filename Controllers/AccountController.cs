@@ -64,7 +64,7 @@ namespace despachoAeronave.Controllers
 
             var authProperties = new AuthenticationProperties
             {
-                IsPersistent = true,
+                IsPersistent = false,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
             };
 

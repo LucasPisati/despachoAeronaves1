@@ -66,6 +66,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.Cookie.Name = "DespachoAuth_" + DateTime.Now.Ticks;
     });
 
 builder.Services.AddSession(options =>
