@@ -43,5 +43,7 @@ namespace despachoAeronave.Models
         public DateTime? FechaFirmaPiloto { get; set; }
 
         public string? FirmaPilotoBase64 { get; set; }
+
+        public string? FirmaDespachadorBase64 { get; set; }
     }
 }

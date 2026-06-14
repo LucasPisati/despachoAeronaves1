@@ -13,3 +13,8 @@ obj/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Temporary script and folders
+build_dispatcher_commits.ps1
+temp_commits/
+
