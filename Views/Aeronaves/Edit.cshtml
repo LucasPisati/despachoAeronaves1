@@ -35,6 +35,26 @@
                         <span asp-validation-for="CapacidadPasajeros" class="text-danger" style="font-size: 12px;"></span>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PesoVacio" class="form-label fw-semibold">Peso Vacío (OEW - kg)</label>
+                            <div class="input-group">
+                                <input asp-for="PesoVacio" type="number" class="form-control" placeholder="Ej: 41413" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="PesoVacio" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PesoMaximoDespegue" class="form-label fw-semibold">Peso Máx. Despegue (MTOW - kg)</label>
+                            <div class="input-group">
+                                <input asp-for="PesoMaximoDespegue" type="number" class="form-control" placeholder="Ej: 79016" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="PesoMaximoDespegue" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label asp-for="Estado" class="form-label fw-semibold">Estado Operacional</label>
                         <select asp-for="Estado" class="form-select" style="border-radius: 8px;">
@@ -62,3 +82,5 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+
