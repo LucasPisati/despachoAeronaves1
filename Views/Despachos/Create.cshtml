@@ -732,6 +732,22 @@
                     });
                 }
 
+                const form = document.getElementById("dispatchForm");
+                if (form) {
+                    form.addEventListener("submit", function (e) {
+                        // Check if blank
+                        const buffer = new Uint32Array(ctx.getImageData(0, 0, dispatcherCanvas.width, dispatcherCanvas.height).data.buffer);
+                        const isBlank = !buffer.some(color => color !== 0);
+
+                        if (isBlank) {
+                            e.preventDefault();
+                            alert("Por favor, realice la firma del despachador antes de continuar.");
+                            return;
+                        }
+
+                        document.getElementById("firmaDespachadorBase64").value = dispatcherCanvas.toDataURL("image/png");
+                    });
+                }
             }
 
             // Initial trigger if loading page with pre-selected flightId
