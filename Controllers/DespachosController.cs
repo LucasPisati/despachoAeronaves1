@@ -177,11 +177,24 @@ namespace despachoAeronave.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Firmar(int id)
         {
-            var despacho = await _context.Despachos.FindAsync(id);
+            var despacho = await _context.Despachos
+                .Include(d => d.Vuelo)
+                .ThenInclude(v => v!.Piloto)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
             if (despacho == null) return NotFound();
+
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userLogin = HttpContext.Session.GetString("UserLogin");
+
+            if (userRole != "Piloto" || despacho.Vuelo?.Piloto?.NombreUsuario != userLogin)
+            {
+                return Forbid();
+            }
 
             despacho.EstaAprobadoPorPiloto = true;
             despacho.FechaFirmaPiloto = DateTime.Now;
+            
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = despacho.Id });
