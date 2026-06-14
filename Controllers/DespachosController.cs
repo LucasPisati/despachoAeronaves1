@@ -92,7 +92,7 @@ namespace despachoAeronave.Controllers
         // POST: Despachos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VueloId,DespachadorNombre,CombustibleRequerido,CargaPago,Ruta,ClimaReporte,NotamsReporte,Observaciones")] Despacho despacho)
+        public async Task<IActionResult> Create([Bind("VueloId,DespachadorNombre,CombustibleRequerido,CargaPago,Ruta,ClimaReporte,NotamsReporte,Observaciones,FirmaDespachadorBase64")] Despacho despacho)
         {
             // Validaciones de Seguridad Operativa
             var flight = await _context.Vuelos
