@@ -488,5 +488,31 @@
         canvas.addEventListener("touchend", function (e) {
             drawing = false;
         });
+
+        const btnLimpiar = document.getElementById("btnLimpiar");
+        const form = document.getElementById("firmaForm");
+        const firmaBase64Input = document.getElementById("firmaBase64");
+
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener("click", function () {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        }
+
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                // Check if blank
+                const buffer = new Uint32Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer);
+                const isBlank = !buffer.some(color => color !== 0);
+
+                if (isBlank) {
+                    e.preventDefault();
+                    alert("Por favor, realice su firma antes de confirmar.");
+                    return;
+                }
+
+                firmaBase64Input.value = canvas.toDataURL("image/png");
+            });
+        }
     });
 </script>
