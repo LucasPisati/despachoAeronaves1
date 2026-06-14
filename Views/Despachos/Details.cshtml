@@ -372,6 +372,14 @@
                 
                 <div class="col-md-6 text-md-end">
                     <div class="d-inline-block text-center border-top pt-2" style="width: 250px;">
+                        @if (!string.IsNullOrEmpty(Model.FirmaDespachadorBase64))
+                        {
+                            <div class="mb-2 text-center">
+                                <div style="display: inline-block; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px; background: #ffffff;">
+                                    <img src="@Model.FirmaDespachadorBase64" alt="Firma Despachador" style="max-height: 80px; width: auto;" />
+                                </div>
+                            </div>
+                        }
                         <span class="font-monospace text-dark d-block" style="font-size: 14px; font-weight: 700;">@Model.DespachadorNombre</span>
                         <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Despachador de Vuelo (DISPATCHER)</span>
                         <small class="text-muted font-monospace" style="font-size: 10px;">Licencia: ANAC #@(Model.Id + 3420)</small>
