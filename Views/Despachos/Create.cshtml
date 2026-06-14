@@ -5,7 +5,6 @@
     var selectedFlight = ViewBag.SelectedFlight as despachoAeronave.Models.Vuelo;
     var currentUserName = Context.Session.GetString("UserName") ?? "";
 }
-
 <div class="row justify-content-center">
     <div class="col-md-9">
         <div class="card card-premium mb-4">
@@ -250,6 +249,21 @@
                             <label asp-for="Observaciones" class="form-label fw-semibold">Observaciones / Desvíos de Seguridad</label>
                             <input asp-for="Observaciones" class="form-control" placeholder="Ej: Operación estándar sobre rutas normales." style="border-radius: 8px;" />
                             <span asp-validation-for="Observaciones" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+
+                    <!-- Dispatcher Digital Signature Canvas -->
+                    <div class="row mb-4" id="dispatcherSignatureContainer">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-semibold d-block">Firma del Despachador Autorizado (Dibuje con el mouse o táctil)</label>
+                            <div class="canvas-wrapper mb-2">
+                                <canvas id="firmaDespachadorCanvas" width="400" height="150"></canvas>
+                            </div>
+                            <div>
+                                <button type="button" id="btnLimpiarDespachador" class="btn btn-sm btn-outline-secondary px-3 py-1" style="border-radius: 6px; font-size: 11px;">Limpiar Firma</button>
+                            </div>
+                            <input type="hidden" id="firmaDespachadorBase64" asp-for="FirmaDespachadorBase64" required />
+                            <span asp-validation-for="FirmaDespachadorBase64" class="text-danger" style="font-size: 12px;"></span>
                         </div>
                     </div>
 
@@ -628,7 +642,6 @@
                 
                 calculateWeightAndCheckClosure();
             });
-
             // Initial trigger if loading page with pre-selected flightId
             if ($('#vueloSelect').val()) {
                 $('#vueloSelect').trigger('change');
