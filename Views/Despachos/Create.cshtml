@@ -5,6 +5,25 @@
     var selectedFlight = ViewBag.SelectedFlight as despachoAeronave.Models.Vuelo;
     var currentUserName = Context.Session.GetString("UserName") ?? "";
 }
+
+<style>
+    #firmaDespachadorCanvas {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        background-color: #f8fafc;
+        cursor: crosshair;
+        touch-action: none;
+        display: block;
+    }
+    .canvas-wrapper {
+        display: inline-block;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 4px;
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-9">
         <div class="card card-premium mb-4">
