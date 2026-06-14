@@ -325,6 +325,15 @@
                             Firmado electrónicamente por el Cmdt. <strong>@(Model.Vuelo?.Piloto?.NombreCompleto)</strong><br />
                             el @Model.FechaFirmaPiloto?.ToString("dd/MM/yyyy a las HH:mm") UTC-3
                         </small>
+                        @if (!string.IsNullOrEmpty(Model.FirmaPilotoBase64))
+                        {
+                            <div class="mt-3">
+                                <span class="text-muted d-block mb-1" style="font-size: 11px; text-transform: uppercase;">Firma del Comandante:</span>
+                                <div style="display: inline-block; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px; background: #ffffff;">
+                                    <img src="@Model.FirmaPilotoBase64" alt="Firma Piloto" style="max-height: 80px; width: auto;" />
+                                </div>
+                            </div>
+                        }
                     }
                     else
                     {
@@ -336,13 +345,19 @@
                         
                         @if (isPilot && Model.Vuelo?.Piloto?.NombreUsuario == Context.Session.GetString("UserLogin"))
                         {
-                            <div class="mt-3 no-print">
-                                <form asp-action="Firmar" method="post">
+                            <div class="mt-3 no-print" id="firma-container">
+                                <h6 class="fw-bold text-dark mb-2" style="font-size: 13px;">Firme en el recuadro para aprobar despacho:</h6>
+                                <div class="canvas-wrapper mb-2">
+                                    <canvas id="firmaCanvas" width="400" height="150"></canvas>
+                                </div>
+                                <form id="firmaForm" asp-action="Firmar" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@Model.Id" />
-                                    <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-2" style="border-radius: 8px; font-size: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
-                                        ✍️ Firmar y Aprobar Release de Vuelo
-                                    </button>
+                                    <input type="hidden" id="firmaBase64" name="firmaBase64" />
+                                    <div class="d-flex gap-2">
+                                        <button type="button" id="btnLimpiar" class="btn btn-sm btn-outline-secondary px-3 py-1" style="border-radius: 6px; font-size: 11px;">Limpiar</button>
+                                        <button type="submit" id="btnGuardarFirma" class="btn btn-sm btn-success fw-bold px-3 py-1" style="border-radius: 6px; font-size: 11px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">Confirmar Firma</button>
+                                    </div>
                                 </form>
                             </div>
                         }
@@ -390,3 +405,4 @@
         color: black !important;
     }
 </style>
+
