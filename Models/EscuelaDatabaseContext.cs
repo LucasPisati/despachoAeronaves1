@@ -92,7 +92,8 @@ namespace despachoAeronave.Models
                     NotamsReporte = "SABE (AEP): ILS CAT I RWY 13 OPERATIONAL. SACO (COR): ALL SERVICES NORMAL.",
                     FechaCreacion = DateTime.Today.AddHours(6),
                     Observaciones = "Vuelo despachado con desvío estándar por clima favorable. Combustible incluye reserva regulada de 45 minutos.",
-                    EstaAprobadoPorPiloto = false
+                    EstaAprobadoPorPiloto = false,
+                    FirmaPilotoBase64 = null
                 }
             );
         }
