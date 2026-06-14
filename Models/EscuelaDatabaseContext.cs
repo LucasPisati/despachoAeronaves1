@@ -93,7 +93,8 @@ namespace despachoAeronave.Models
                     FechaCreacion = DateTime.Today.AddHours(6),
                     Observaciones = "Vuelo despachado con desvío estándar por clima favorable. Combustible incluye reserva regulada de 45 minutos.",
                     EstaAprobadoPorPiloto = false,
-                    FirmaPilotoBase64 = null
+                    FirmaPilotoBase64 = null,
+                    FirmaDespachadorBase64 = null
                 }
             );
         }
