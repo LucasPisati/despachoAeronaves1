@@ -41,5 +41,7 @@ namespace despachoAeronave.Models
         public bool EstaAprobadoPorPiloto { get; set; } = false;
 
         public DateTime? FechaFirmaPiloto { get; set; }
+
+        public string? FirmaPilotoBase64 { get; set; }
     }
 }
