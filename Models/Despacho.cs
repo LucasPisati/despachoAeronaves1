@@ -31,8 +31,15 @@ namespace despachoAeronave.Models
         [Required(ErrorMessage = "El reporte de clima es requerido")]
         public string ClimaReporte { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "El reporte de NOTAMs es requerido")]
+        public string NotamsReporte { get; set; } = string.Empty;
+
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
         public string? Observaciones { get; set; }
+
+        public bool EstaAprobadoPorPiloto { get; set; } = false;
+
+        public DateTime? FechaFirmaPiloto { get; set; }
     }
 }
