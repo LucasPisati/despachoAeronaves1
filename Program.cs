@@ -105,11 +105,87 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<EscuelaDatabaseContext>();
         context.Database.EnsureCreated();
+
+        // Update weak passwords for existing DB entries to prevent browser safety alert popups
+        bool changed = false;
+        var adminUser = context.Usuarios.FirstOrDefault(u => u.NombreUsuario == "admin" && u.Contrasena == "admin123");
+        if (adminUser != null)
+        {
+            adminUser.Contrasena = "AdminSecure$2026!";
+            changed = true;
+        }
+
+        var despachoUser = context.Usuarios.FirstOrDefault(u => u.NombreUsuario == "despacho" && u.Contrasena == "despacho123");
+        if (despachoUser != null)
+        {
+            despachoUser.Contrasena = "DespachoSecure$2026!";
+            changed = true;
+        }
+
+        var pilotoUser = context.Usuarios.FirstOrDefault(u => u.NombreUsuario == "piloto" && u.Contrasena == "piloto123");
+        if (pilotoUser != null)
+        {
+            pilotoUser.Contrasena = "PilotoSecure$2026!";
+            changed = true;
+        }
+
+        if (changed)
+        {
+            context.SaveChanges();
+        }
+
+        // Add additional pilots dynamically if they do not exist
+        bool addedPilots = false;
+        if (!context.Usuarios.Any(u => u.Id == 4))
+        {
+            context.Usuarios.Add(new Usuario { Id = 4, NombreUsuario = "piloto2", Contrasena = "PilotoSecure$2026!", NombreCompleto = "Laura Fernández (Comandante)", Rol = "Piloto" });
+            addedPilots = true;
+        }
+        if (!context.Usuarios.Any(u => u.Id == 5))
+        {
+            context.Usuarios.Add(new Usuario { Id = 5, NombreUsuario = "piloto3", Contrasena = "PilotoSecure$2026!", NombreCompleto = "Carlos Rodríguez (Comandante)", Rol = "Piloto" });
+            addedPilots = true;
+        }
+        if (!context.Usuarios.Any(u => u.Id == 6))
+        {
+            context.Usuarios.Add(new Usuario { Id = 6, NombreUsuario = "piloto4", Contrasena = "PilotoSecure$2026!", NombreCompleto = "Patricia Sosa (Comandante)", Rol = "Piloto" });
+            addedPilots = true;
+        }
+        if (!context.Usuarios.Any(u => u.Id == 7))
+        {
+            context.Usuarios.Add(new Usuario { Id = 7, NombreUsuario = "piloto5", Contrasena = "PilotoSecure$2026!", NombreCompleto = "Alejandro Silva (Comandante)", Rol = "Piloto" });
+            addedPilots = true;
+        }
+
+        if (addedPilots)
+        {
+            context.SaveChanges();
+        }
+
+        // Reassign seeded flights to the new pilots
+        bool flightsUpdated = false;
+        var flight1 = context.Vuelos.FirstOrDefault(v => v.Id == 1);
+        if (flight1 != null && flight1.PilotoId == 3)
+        {
+            flight1.PilotoId = 5; // Carlos Rodríguez
+            flightsUpdated = true;
+        }
+        var flight3 = context.Vuelos.FirstOrDefault(v => v.Id == 3);
+        if (flight3 != null && flight3.PilotoId == 3)
+        {
+            flight3.PilotoId = 4; // Laura Fernández
+            flightsUpdated = true;
+        }
+
+        if (flightsUpdated)
+        {
+            context.SaveChanges();
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al crear la base de datos.");
+        logger.LogError(ex, "Ocurrió un error al inicializar la base de datos o actualizar las contraseñas.");
     }
 }
 
@@ -131,3 +207,21 @@ if (isDirectRun)
 }
 
 app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
