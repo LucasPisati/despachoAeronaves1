@@ -21,5 +21,11 @@ namespace despachoAeronave.Models
         [Required]
         [StringLength(30)]
         public string Estado { get; set; } = "Activa"; // "Activa", "Mantenimiento", "Inactiva"
+
+        [Range(0, 1000000, ErrorMessage = "El peso máximo de despegue debe ser mayor o igual a 0")]
+        public double PesoMaximoDespegue { get; set; } = 79000; // MTOW en kg
+
+        [Range(0, 1000000, ErrorMessage = "El peso vacío debe ser mayor o igual a 0")]
+        public double PesoVacio { get; set; } = 41000; // OEW en kg
     }
 }
