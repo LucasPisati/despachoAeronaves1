@@ -175,7 +175,7 @@ namespace despachoAeronave.Controllers
         // POST: Despachos/Firmar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Firmar(int id)
+        public async Task<IActionResult> Firmar(int id, string firmaBase64)
         {
             var despacho = await _context.Despachos
                 .Include(d => d.Vuelo)
