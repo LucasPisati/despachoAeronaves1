@@ -123,6 +123,8 @@
                         {
                             foreach (var flight in Model)
                             {
+                                bool isDispatched = dispatchedFlightIds.Contains(flight.Id);
+                                bool isSigned = pilotSignedFlightIds.Contains(flight.Id);
                                 <tr>
                                     <td class="py-3 px-4">
                                         <div class="d-flex align-items-center gap-2">
@@ -133,6 +135,10 @@
                                             </div>
                                             <div>
                                                 <span class="d-block fw-bold text-dark">@flight.NumeroVuelo</span>
+                                                @if (isDispatched && isSigned)
+                                                {
+                                                    <span class="badge bg-success-light text-success" style="font-size: 10px; padding: 2px 6px;">✍️ Firmado</span>
+                                                }
                                             </div>
                                         </div>
                                     </td>
@@ -193,10 +199,6 @@
                                         }
                                     </td>
                                     <td class="text-center py-3">
-                                        @{
-                                            bool isDispatched = dispatchedFlightIds.Contains(flight.Id);
-                                            bool isSigned = pilotSignedFlightIds.Contains(flight.Id);
-                                        }
                                         @if (isDispatched)
                                         {
                                             if (isSigned)
