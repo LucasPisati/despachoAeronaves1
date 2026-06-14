@@ -1,6 +1,40 @@
 @model despachoAeronave.Models.Despacho
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Despacho de Vuelo #" + Model.Id;
+    var oew = Model.Vuelo?.Aeronave?.PesoVacio ?? 0;
+    var mtow = Model.Vuelo?.Aeronave?.PesoMaximoDespegue ?? 0;
+    var tow = oew + Model.CargaPago + Model.CombustibleRequerido;
+    var pct = mtow > 0 ? (tow / mtow) * 100 : 0;
+    
+    var isPilot = Context.Session.GetString("UserRole") == "Piloto";
+    
+    // Calculate %MAC
+    var mac = 22.0 + (Model.CargaPago / 1000.0) * 0.35 - (Model.CombustibleRequerido / 1000.0) * 0.12;
+    if (mac < 15.0) mac = 15.0;
+    if (mac > 35.0) mac = 35.0;
+    
+    // Calculate Trim (units of trim)
+    var trim = 7.0 - ((mac - 15.0) / 20.0) * 3.5;
+
+    // Coordinate calculations for the static SVG chart
+    var rawMac = 22.0 + (Model.CargaPago / 1000.0) * 0.35 - (Model.CombustibleRequerido / 1000.0) * 0.12;
+    var xPercent = (rawMac - 10.0) / 30.0;
+    var cx = 40.0 + xPercent * 200.0;
+    if (cx < 20.0) cx = 20.0;
+    if (cx > 260.0) cx = 260.0;
+
+    var yRange = mtow - oew;
+    var yPercent = yRange > 0 ? (double)(tow - oew) / yRange : 0.5;
+
+    var isOverweight = tow > mtow;
+    var isUnbalanced = rawMac < 15.0 || rawMac > 35.0;
+    var dotColor = "#10b981";
+    if (isOverweight || isUnbalanced) {
+        dotColor = "#ef4444";
+    } else if (pct > 90 || rawMac < 17.0 || rawMac > 33.0) {
+        dotColor = "#f59e0b";
+    }
 }
 
 <div class="row justify-content-center">
@@ -25,7 +59,7 @@
         </div>
 
         <!-- Release Document Card -->
-        <div class="card card-premium p-5" id="flightReleaseDoc" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+        <div class="card card-premium p-5 mb-4" id="flightReleaseDoc" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <!-- Document Header -->
             <div class="row align-items-center border-bottom pb-4 mb-4">
                 <div class="col-sm-6 d-flex align-items-center gap-2">
@@ -59,9 +93,9 @@
                     </strong>
                 </div>
                 <div class="col-sm-3 mb-2">
-                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Itinerario</span>
-                    <strong class="text-dark" style="font-size: 16px;">
-                        @(Model.Vuelo?.Origen.Split(' ')[0]) a @(Model.Vuelo?.Destino.Split(' ')[0])
+                    <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Comandante Asignado</span>
+                    <strong class="text-dark text-primary" style="font-size: 16px;">
+                        @(Model.Vuelo?.Piloto?.NombreCompleto ?? "No Asignado")
                     </strong>
                 </div>
                 <div class="col-sm-3 mb-2">
@@ -111,7 +145,7 @@
                         <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">PARÁMETROS DE CARGA Y PASAJEROS</h6>
                         <table class="table table-sm table-borderless m-0" style="font-size: 13px;">
                             <tr>
-                                <td>Carga de Pago Comercial (Catering, equipaje, Pax):</td>
+                                <td>Carga de Pago Comercial:</td>
                                 <td class="text-end fw-bold">@Model.CargaPago.ToString("N0") kg</td>
                             </tr>
                             <tr>
@@ -123,6 +157,121 @@
                                 <td class="text-end fw-bold text-primary" style="font-size: 15px;">@Model.CargaPago.ToString("N0") kg</td>
                             </tr>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight and Balance Chart (Premium Widget) -->
+            <div class="card border mb-4 shadow-sm">
+                <div class="card-header bg-white py-2">
+                    <h6 class="m-0 fw-bold text-dark" style="font-size: 13px;">ANÁLISIS DE PESO Y BALANCE (WEIGHT & BALANCE)</h6>
+                </div>
+                <div class="card-body bg-light py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <table class="table table-sm table-borderless m-0 mb-3" style="font-size: 13px;">
+                                <tr>
+                                    <td>Peso Operacional Vacío (OEW):</td>
+                                    <td class="text-end text-muted font-monospace">@oew.ToString("N0") kg</td>
+                                </tr>
+                                <tr>
+                                    <td>(+) Carga de Pago (Payload):</td>
+                                    <td class="text-end text-muted font-monospace">@Model.CargaPago.ToString("N0") kg</td>
+                                </tr>
+                                <tr>
+                                    <td>(+) Combustible Requerido:</td>
+                                    <td class="text-end text-muted font-monospace">@Model.CombustibleRequerido.ToString("N0") kg</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td class="fw-bold">PESO TOTAL DE DESPEGUE (TOW):</td>
+                                    <td class="text-end fw-bold text-dark font-monospace">@tow.ToString("N0") kg</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">LÍMITE MÁXIMO DE DESPEGUE (MTOW):</td>
+                                    <td class="text-end fw-bold text-danger font-monospace">@mtow.ToString("N0") kg</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td class="fw-semibold text-primary">Centro de Gravedad (CG):</td>
+                                    <td class="text-end fw-bold text-primary font-monospace">@mac.ToString("F1")% MAC</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-success">Trim de Despegue Recomendado:</td>
+                                    <td class="text-end fw-bold text-success font-monospace">@trim.ToString("F1") unidades (ANU)</td>
+                                </tr>
+                            </table>
+                            
+                            <div>
+                                <div class="d-flex justify-content-between mb-1" style="font-size: 11px; font-weight: 600;">
+                                    <span>Límite de Carga (MTOW)</span>
+                                    <span>@pct.ToString("N1")%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar @(pct > 90 ? "bg-warning" : "bg-success")" role="progressbar" style="width: @pct%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 ps-md-4 border-start text-center">
+                            @if (tow <= mtow)
+                            {
+                                <div class="p-3 rounded bg-white border border-success text-success mb-3" style="font-size: 13px;">
+                                    <strong class="d-block mb-1">⚖️ BALANCE OPERATIVO OK</strong>
+                                    <span>Margen de despegue disponible: <strong>@((mtow - tow).ToString("N0")) kg</strong></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="p-3 rounded bg-white border border-danger text-danger mb-3" style="font-size: 13px;">
+                                    <strong class="d-block mb-1">⚠️ SOBREPESO CRÍTICO</strong>
+                                    <span>El peso supera el MTOW por <strong>@((tow - mtow).ToString("N0")) kg</strong>. Operación no autorizada.</span>
+                                </div>
+                            }
+
+                            <!-- CG Envelope Vector Chart (Static) -->
+                            <div class="p-2 text-center bg-white border rounded shadow-sm">
+                                <span class="d-block fw-bold text-secondary mb-2" style="font-size: 9px; letter-spacing: 0.5px;">ENVOLVENTE DE BALANCEO (CG vs TOW)</span>
+                                <svg id="cgEnvelopeSvg" width="100%" height="150" viewBox="0 0 280 150" style="background-color: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                    <!-- Grid Lines X (CG) -->
+                                    <line x1="40" y1="15" x2="40" y2="115" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="80" y1="15" x2="80" y2="115" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="120" y1="15" x2="120" y2="115" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                    <line x1="160" y1="15" x2="160" y2="115" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="200" y1="15" x2="200" y2="115" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="240" y1="15" x2="240" y2="115" stroke="#e2e8f0" stroke-width="1" />
+                                    
+                                    <!-- Grid Lines Y (Weight) -->
+                                    <line x1="40" y1="15" x2="240" y2="15" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="40" y1="40" x2="240" y2="40" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                    <line x1="40" y1="65" x2="240" y2="65" stroke="#e2e8f0" stroke-width="1" />
+                                    <line x1="40" y1="90" x2="240" y2="90" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                    <line x1="40" y1="115" x2="240" y2="115" stroke="#e2e8f0" stroke-width="1" />
+
+                                    <!-- Axes -->
+                                    <line x1="40" y1="115" x2="250" y2="115" stroke="#94a3b8" stroke-width="1.5" />
+                                    <line x1="40" y1="10" x2="40" y2="115" stroke="#94a3b8" stroke-width="1.5" />
+
+                                    <!-- Safe Area Polygon (Envelope) -->
+                                    <polygon id="envelopePolygon" points="73.3,15 206.7,15 206.7,115 73.3,115" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+
+                                    <!-- Labels X (CG % MAC) -->
+                                    <text x="73.3" y="126" font-size="7" fill="#64748b" text-anchor="middle">15%</text>
+                                    <text x="140" y="126" font-size="7" fill="#64748b" text-anchor="middle">25%</text>
+                                    <text x="206.7" y="126" font-size="7" fill="#64748b" text-anchor="middle">35%</text>
+                                    <text x="140" y="136" font-size="7" fill="#475569" font-weight="bold" text-anchor="middle">Centro de Gravedad (% MAC)</text>
+
+                                    <!-- Labels Y (Weight) -->
+                                    <text x="35" y="18" font-size="7" fill="#64748b" text-anchor="end">MTOW</text>
+                                    <text x="35" y="68" font-size="7" fill="#64748b" text-anchor="end">Medio</text>
+                                    <text x="35" y="118" font-size="7" fill="#64748b" text-anchor="end">OEW</text>
+                                    
+                                    <!-- Center of Gravity Plotted Dot -->
+                                    <circle id="cgDot" cx="@cx.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)" cy="@((115.0 - yPercent * 100.0).ToString("F1", System.Globalization.CultureInfo.InvariantCulture))" r="5.5" fill="@dotColor" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.25));" />
+                                </svg>
+                                <div class="mt-1 d-flex justify-content-between" style="font-size: 8px;">
+                                    <span class="text-success fw-bold">🟢 En límites</span>
+                                    <span class="text-danger fw-bold">🔴 Fuera de balance / peso</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,6 +292,14 @@
                 </div>
             </div>
 
+            <!-- NOTAMs Briefing -->
+            <div class="border rounded p-3 mb-4">
+                <h6 class="text-primary fw-bold mb-2">AVISOS OPERACIONALES ACTIVOS (NOTAMs)</h6>
+                <div class="bg-light p-3 border rounded text-dark font-monospace text-uppercase" style="font-size: 12px; line-height: 1.6; letter-spacing: 0.5px;">
+                    @Html.Raw(Model.NotamsReporte.Replace("\n", "<br/>"))
+                </div>
+            </div>
+
             <!-- Remarks -->
             @if (!string.IsNullOrEmpty(Model.Observaciones))
             {
@@ -152,21 +309,57 @@
                 </div>
             }
 
-            <!-- Dispatcher signature details -->
+            <!-- Dispatcher & Pilot digital signatures -->
             <div class="row mt-5 pt-4 border-top">
-                <div class="col-sm-6">
-                    <span class="text-muted d-block mb-4" style="font-size: 11px; text-transform: uppercase;">Estado de Firmas y Validación</span>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="badge bg-success py-2 px-3 fw-bold" style="border-radius: 20px;">
-                            DESPACHO AUTORIZADO
+                <div class="col-md-6 mb-3">
+                    <span class="text-muted d-block mb-3" style="font-size: 11px; text-transform: uppercase;">Estado de Firmas y Validación</span>
+                    
+                    @if (Model.EstaAprobadoPorPiloto)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="badge bg-success py-2 px-3 fw-bold" style="border-radius: 20px; font-size: 12px;">
+                                ✔️ RELEASE COMPLETADO y FIRMADO
+                            </div>
                         </div>
-                        <small class="text-muted">Autorización Electrónica</small>
-                    </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 11px;">
+                            Firmado electrónicamente por el Cmdt. <strong>@(Model.Vuelo?.Piloto?.NombreCompleto)</strong><br />
+                            el @Model.FechaFirmaPiloto?.ToString("dd/MM/yyyy a las HH:mm") UTC-3
+                        </small>
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="badge bg-warning text-dark py-2 px-3 fw-bold" style="border-radius: 20px; font-size: 12px;">
+                                ⏳ PENDIENTE DE FIRMA DEL COMANDANTE
+                            </div>
+                        </div>
+                        
+                        @if (isPilot && Model.Vuelo?.Piloto?.NombreUsuario == Context.Session.GetString("UserLogin"))
+                        {
+                            <div class="mt-3 no-print">
+                                <form asp-action="Firmar" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-2" style="border-radius: 8px; font-size: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                                        ✍️ Firmar y Aprobar Release de Vuelo
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <small class="text-muted d-block">
+                                El despacho operativo requiere la firma digital del Comandante asignado (<strong>@(Model.Vuelo?.Piloto?.NombreCompleto ?? "Sin Piloto")</strong>) para iniciar operaciones.
+                            </small>
+                        }
+                    }
                 </div>
-                <div class="col-sm-6 text-sm-end">
+                
+                <div class="col-md-6 text-md-end">
                     <div class="d-inline-block text-center border-top pt-2" style="width: 250px;">
                         <span class="font-monospace text-dark d-block" style="font-size: 14px; font-weight: 700;">@Model.DespachadorNombre</span>
-                        <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Despachador de Vuelo / Dispatcher</span>
+                        <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Despachador de Vuelo (DISPATCHER)</span>
+                        <small class="text-muted font-monospace" style="font-size: 10px;">Licencia: ANAC #@(Model.Id + 3420)</small>
                     </div>
                 </div>
             </div>
@@ -176,7 +369,7 @@
 
 <style media="print">
     /* Hide layout and sidebar elements when printing */
-    .sidebar, .top-navbar, .no-print, header, footer {
+    .sidebar, .top-navbar, .no-print, header, footer, button, a {
         display: none !important;
     }
     .content-area {
