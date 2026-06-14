@@ -22,6 +22,26 @@
                         <span asp-validation-for="Matricula" class="text-danger" style="font-size: 12px;"></span>
                     </div>
 
+                    <!-- Aircraft Template Assistant -->
+                    <div class="mb-3 p-3 bg-light rounded border">
+                        <label class="form-label fw-bold text-primary mb-1" style="font-size: 13px;">✈️ Asistente de Modelos Estándar</label>
+                        <p class="text-muted mb-2" style="font-size: 11px;">Presione una plantilla para autocompletar las especificaciones y pesos reales:</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-model="Boeing 737-800" data-pax="170" data-mtow="79016" data-oew="41413" style="font-size: 11px; border-radius: 6px;">
+                                B737-800
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-model="Boeing 737-800 MAX" data-pax="186" data-mtow="82190" data-oew="45070" style="font-size: 11px; border-radius: 6px;">
+                                B737-800 MAX
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-model="Embraer 190" data-pax="96" data-mtow="51800" data-oew="28080" style="font-size: 11px; border-radius: 6px;">
+                                Embraer 190
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-model="Airbus A330-200" data-pax="272" data-mtow="242000" data-oew="119600" style="font-size: 11px; border-radius: 6px;">
+                                A330-200
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label asp-for="Modelo" class="form-label fw-semibold">Modelo / Tipo de Aeronave</label>
                         <input asp-for="Modelo" class="form-control" placeholder="Ej: Boeing 737-800" style="border-radius: 8px;" required />
@@ -32,6 +52,26 @@
                         <label asp-for="CapacidadPasajeros" class="form-label fw-semibold">Capacidad de Pasajeros</label>
                         <input asp-for="CapacidadPasajeros" type="number" class="form-control" placeholder="Ej: 170" style="border-radius: 8px;" required />
                         <span asp-validation-for="CapacidadPasajeros" class="text-danger" style="font-size: 12px;"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PesoVacio" class="form-label fw-semibold">Peso Vacío (OEW - kg)</label>
+                            <div class="input-group">
+                                <input asp-for="PesoVacio" type="number" class="form-control" placeholder="Ej: 41413" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="PesoVacio" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PesoMaximoDespegue" class="form-label fw-semibold">Peso Máx. Despegue (MTOW - kg)</label>
+                            <div class="input-group">
+                                <input asp-for="PesoMaximoDespegue" type="number" class="form-control" placeholder="Ej: 79016" style="border-radius: 8px 0 0 8px;" required />
+                                <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
+                            </div>
+                            <span asp-validation-for="PesoMaximoDespegue" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
                     </div>
 
                     <div class="mb-4">
@@ -60,4 +100,40 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            $('.preset-btn').click(function() {
+                var model = $(this).data('model');
+                var pax = $(this).data('pax');
+                var mtow = $(this).data('mtow');
+                var oew = $(this).data('oew');
+
+                $('#Modelo').val(model);
+                $('#CapacidadPasajeros').val(pax);
+                $('#PesoVacio').val(oew);
+                $('#PesoMaximoDespegue').val(mtow);
+                
+                // Visual feedback highlight
+                const fields = ['#Modelo', '#CapacidadPasajeros', '#PesoVacio', '#PesoMaximoDespegue'];
+                fields.forEach(f => {
+                    const el = $(f);
+                    el.css('transition', 'background-color 0.5s ease');
+                    el.css('background-color', '#e0f2fe');
+                    setTimeout(() => {
+                        el.css('background-color', '');
+                    }, 500);
+                });
+            });
+        });
+    </script>
 }
+
+
+
+
+
+
+
+
+
+
