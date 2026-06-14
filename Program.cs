@@ -118,6 +118,17 @@ using (var scope = app.Services.CreateScope())
                     ALTER TABLE [dbo].[Despachos] ADD [FirmaPilotoBase64] nvarchar(max) NULL;
                 END
             ");
+
+            context.Database.ExecuteSqlRaw(@"
+                IF NOT EXISTS (
+                    SELECT * FROM sys.columns 
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Despachos]') 
+                    AND name = N'FirmaDespachadorBase64'
+                )
+                BEGIN
+                    ALTER TABLE [dbo].[Despachos] ADD [FirmaDespachadorBase64] nvarchar(max) NULL;
+                END
+            ");
         }
         catch (Exception)
         {
