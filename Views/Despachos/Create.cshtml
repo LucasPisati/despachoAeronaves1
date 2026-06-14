@@ -8,13 +8,13 @@
 
 <div class="row justify-content-center">
     <div class="col-md-9">
-        <div class="card card-premium">
+        <div class="card card-premium mb-4">
             <div class="card-header">
                 <h5 class="m-0" style="font-weight: 700; font-size: 16px; color: #1e293b;">Planificador de Despacho de Vuelo</h5>
-                <small class="text-muted">Cálculo de combustible, ruta de navegación y análisis meteorológico (METAR)</small>
+                <small class="text-muted">Cálculo de combustible, peso & balance (W&B) y análisis de seguridad meteorológica y NOTAMs</small>
             </div>
             <div class="card-body p-4">
-                <form asp-action="Create" method="post">
+                <form asp-action="Create" method="post" id="dispatchForm">
                     @Html.AntiForgeryToken()
                     
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
@@ -29,11 +29,12 @@
                             <span asp-validation-for="VueloId" class="text-danger" style="font-size: 12px;"></span>
                         </div>
                         <div class="col-md-6">
-                            <div class="mt-4" id="flightInfoPanel">
+                            <div class="mt-2" id="flightInfoPanel">
                                 @if (selectedFlight != null)
                                 {
                                     <div class="p-2 border rounded bg-white" style="font-size: 13px;">
                                         <strong>Matrícula:</strong> @(selectedFlight.Aeronave?.Matricula ?? "No Asignada") (@selectedFlight.Aeronave?.Modelo) <br />
+                                        <strong>Comandante:</strong> @(selectedFlight.Piloto?.NombreCompleto ?? "No Asignado") <br />
                                         <strong>Ruta:</strong> @selectedFlight.Origen a @selectedFlight.Destino <br />
                                         <strong>Salida:</strong> @selectedFlight.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")
                                     </div>
@@ -48,44 +49,196 @@
                         </div>
                     </div>
 
-                    <!-- Step 2: Fuel and Weight Parameters -->
+                    <!-- Step 2: Weight & Balance Calculator Widget (Dynamic) -->
+                    <div class="card border mb-4 shadow-sm" id="weightCalcCard" style="display: none;">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calculator me-2" viewBox="0 0 16 16">
+                                    <path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                                    <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
+                                </svg>
+                                Calculadora de Peso y Balance Operacional (W&B)
+                            </h6>
+                        </div>
+                        <div class="card-body bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-7">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block">Peso Vacío (OEW)</small>
+                                            <span id="oewVal" class="fw-bold fs-6">--</span> <small class="text-muted">kg</small>
+                                        </div>
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block">Carga de Pago</small>
+                                            <span id="payloadVal" class="fw-bold fs-6">0</span> <small class="text-muted">kg</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Combustible</small>
+                                            <span id="fuelVal" class="fw-bold fs-6">0</span> <small class="text-muted">kg</small>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center mb-3 border-top pt-2 mt-2" style="font-size: 13px;">
+                                        <div class="col-6 border-end">
+                                            <small class="text-muted d-block">Centro de Gravedad (CG)</small>
+                                            <span id="cgVal" class="fw-bold text-primary fs-6">22.0</span> <span class="text-muted" style="font-size: 11px;">% MAC</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Trim de Despegue (Pitch Trim)</small>
+                                            <span id="trimVal" class="fw-bold text-success fs-6">5.8</span> <span class="text-muted" style="font-size: 11px;">unidades (ANU)</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between mb-1" style="font-size: 13px;">
+                                            <span class="fw-semibold">Peso Estimado al Despegue (TOW)</span>
+                                            <span class="fw-bold"><span id="towVal">0</span> / <span id="mtowVal">--</span> kg</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                                            <div id="towProgressBar" class="progress-bar bg-success animate-all" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 ps-md-4 border-start">
+                                    <div class="p-2 text-center rounded mb-3" id="weightAlertBox" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; font-size: 13px;">
+                                        <strong class="d-block mb-1" id="weightStatusTitle">✅ PESO DENTRO DE LÍMITES</strong>
+                                        <span id="weightStatusDesc">Margen disponible: -- kg</span>
+                                    </div>
+                                    
+                                    <!-- CG Envelope Vector Chart -->
+                                    <div class="p-2 text-center bg-white border rounded shadow-sm">
+                                        <span class="d-block fw-bold text-secondary mb-2" style="font-size: 10px; letter-spacing: 0.5px;">ENVOLVENTE DE BALANCEO (CG vs TOW)</span>
+                                        <svg id="cgEnvelopeSvg" width="100%" height="160" viewBox="0 0 280 160" style="background-color: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                            <!-- Grid Lines X (CG) -->
+                                            <line x1="40" y1="15" x2="40" y2="125" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="80" y1="15" x2="80" y2="125" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="120" y1="15" x2="120" y2="125" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                            <line x1="160" y1="15" x2="160" y2="125" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="200" y1="15" x2="200" y2="125" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="240" y1="15" x2="240" y2="125" stroke="#e2e8f0" stroke-width="1" />
+                                            
+                                            <!-- Grid Lines Y (Weight) -->
+                                            <line x1="40" y1="15" x2="240" y2="15" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="40" y1="42.5" x2="240" y2="42.5" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                            <line x1="40" y1="70" x2="240" y2="70" stroke="#e2e8f0" stroke-width="1" />
+                                            <line x1="40" y1="97.5" x2="240" y2="97.5" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2" />
+                                            <line x1="40" y1="125" x2="240" y2="125" stroke="#e2e8f0" stroke-width="1" />
+
+                                            <!-- Axes -->
+                                            <line x1="40" y1="125" x2="250" y2="125" stroke="#94a3b8" stroke-width="1.5" />
+                                            <line x1="40" y1="10" x2="40" y2="125" stroke="#94a3b8" stroke-width="1.5" />
+
+                                            <!-- Safe Area Polygon (Envelope)
+                                                 X mapping: 10% to 40% (delta = 30%). Grid Width = 200px (40 to 240). Scale = 200/30 = 6.667px per 1%.
+                                                 Y mapping: OEW to MTOW. Grid Height = 110px (15 to 125).
+                                                 CG Safe range: 15% MAC to 35% MAC.
+                                                 X coordinates:
+                                                   15% MAC: 40 + (15-10)*6.667 = 73.3px
+                                                   35% MAC: 40 + (35-10)*6.667 = 206.7px
+                                                 MTOW (Top): 15px
+                                                 OEW (Bottom): 125px
+                                            -->
+                                            <polygon id="envelopePolygon" points="73.3,15 206.7,15 206.7,125 73.3,125" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+
+                                            <!-- Labels X (CG % MAC) -->
+                                            <text x="73.3" y="136" font-size="7" fill="#64748b" text-anchor="middle">15%</text>
+                                            <text x="140" y="136" font-size="7" fill="#64748b" text-anchor="middle">25%</text>
+                                            <text x="206.7" y="136" font-size="7" fill="#64748b" text-anchor="middle">35%</text>
+                                            <text x="140" y="146" font-size="8" fill="#475569" font-weight="bold" text-anchor="middle">Centro de Gravedad (% MAC)</text>
+
+                                            <!-- Labels Y (Weight) -->
+                                            <text x="35" y="18" font-size="7" fill="#64748b" text-anchor="end">MTOW</text>
+                                            <text x="35" y="73" font-size="7" fill="#64748b" text-anchor="end">Medio</text>
+                                            <text x="35" y="128" font-size="7" fill="#64748b" text-anchor="end">OEW</text>
+                                            
+                                            <!-- Center of Gravity Plotted Dot -->
+                                            <circle id="cgDot" cx="140" cy="70" r="5.5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.25)); transition: cx 0.4s ease, cy 0.4s ease, fill 0.3s ease;" />
+                                        </svg>
+                                        <div class="mt-1 d-flex justify-content-between" style="font-size: 9px;">
+                                            <span class="text-success fw-bold">🟢 Balanceado y en límites</span>
+                                            <span class="text-danger fw-bold">🔴 Fuera de envolvente</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Fuel and Weight Parameters -->
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <label asp-for="CombustibleRequerido" class="form-label fw-semibold">Combustible Requerido (kg)</label>
                             <div class="input-group">
-                                <input asp-for="CombustibleRequerido" type="number" class="form-control" placeholder="Ej: 8500" style="border-radius: 8px 0 0 8px;" required />
+                                <input asp-for="CombustibleRequerido" type="number" class="form-control weight-input" id="fuelInput" placeholder="Ej: 8500" style="border-radius: 8px 0 0 8px;" required />
                                 <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
                             </div>
                             <span asp-validation-for="CombustibleRequerido" class="text-danger" style="font-size: 12px;"></span>
-                            <small class="text-muted" style="font-size: 11px;">Incluye Combustible de Ruta, Reserva y Combustible Alterno.</small>
+                            <small class="text-muted" style="font-size: 11px;">Combustible mínimo requerido para ruta, reserva y aeropuerto alterno.</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label asp-for="CargaPago" class="form-label fw-semibold">Carga de Pago (kg)</label>
                             <div class="input-group">
-                                <input asp-for="CargaPago" type="number" class="form-control" placeholder="Ej: 14200" style="border-radius: 8px 0 0 8px;" required />
+                                <input asp-for="CargaPago" type="number" class="form-control weight-input" id="payloadInput" placeholder="Ej: 14200" style="border-radius: 8px 0 0 8px;" required />
                                 <span class="input-group-text bg-light fw-medium" style="border-radius: 0 8px 8px 0;">kg</span>
                             </div>
                             <span asp-validation-for="CargaPago" class="text-danger" style="font-size: 12px;"></span>
-                            <small class="text-muted" style="font-size: 11px;">Peso total estimado de pasajeros, equipaje y carga comercial.</small>
+                            <small class="text-muted" style="font-size: 11px;">Peso estimado total de pasajeros, equipaje de cabina y bodega.</small>
                         </div>
                     </div>
 
-                    <!-- Step 3: Route and Meteorological Data -->
+                    <!-- Step 4: Route ATC and Autocomplete Suggestions -->
                     <div class="mb-3">
                         <label asp-for="Ruta" class="form-label fw-semibold">Ruta ATC (Navegación)</label>
-                        <input asp-for="Ruta" class="form-control" placeholder="Ej: EZE UT312 SCL" style="border-radius: 8px;" required />
+                        <input asp-for="Ruta" class="form-control" id="rutaInput" placeholder="Ej: EZE UT312 SCL" style="border-radius: 8px;" required />
                         <span asp-validation-for="Ruta" class="text-danger" style="font-size: 12px;"></span>
+                        
+                        <!-- Route suggestions panel -->
+                        <div id="routeSuggestionsPanel" class="mt-2 p-2 bg-light border rounded" style="display: none; font-size: 12px;">
+                            <span class="text-muted d-block mb-1 fw-bold">🗺️ Rutas Operativas Recomendadas (Haz clic para aplicar):</span>
+                            <div id="routeSuggestionsList" class="d-flex gap-2 flex-wrap"></div>
+                        </div>
+                        
                         <small class="text-muted" style="font-size: 11px;">Defina aerovías, puntos de reporte y aeropuertos alternos.</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="ClimaReporte" class="form-label fw-semibold">Reporte Meteorológico (METAR / TAF)</label>
-                        <textarea asp-for="ClimaReporte" rows="3" class="form-control font-monospace" placeholder="SABE 010600Z 12008KT 9999 FEW030 18/14 Q1015..." style="border-radius: 8px; font-size: 13px;" required></textarea>
-                        <span asp-validation-for="ClimaReporte" class="text-danger" style="font-size: 12px;"></span>
-                        <small class="text-muted" style="font-size: 11px;">Copie los reportes de clima vigentes para origen, destino y alterno.</small>
+                    <!-- Step 5: Weather and NOTAMs (with Runway Closure Simulation) -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label asp-for="ClimaReporte" class="form-label fw-semibold mb-0">Meteorología (METAR / TAF)</label>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="metarBtn" style="font-size: 11px; border-radius: 6px; height: 24px;" disabled>
+                                    🌐 Clima Real (NOAA)
+                                </button>
+                            </div>
+                            <textarea asp-for="ClimaReporte" rows="4" class="form-control font-monospace" id="metarInput" placeholder="Presione 'Clima Real' para cargar datos meteorológicos..." style="border-radius: 8px; font-size: 12px; height: 100px;" required></textarea>
+                            <span asp-validation-for="ClimaReporte" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label asp-for="NotamsReporte" class="form-label fw-semibold mb-0">Reporte de NOTAMs Activos</label>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="notamBtn" style="font-size: 11px; border-radius: 6px; height: 24px;" disabled>
+                                    📋 Cargar NOTAMs
+                                </button>
+                            </div>
+                            <textarea asp-for="NotamsReporte" rows="4" class="form-control font-monospace text-danger" id="notamInput" placeholder="Cargue los NOTAMs de la ruta para revisar alertas de pistas..." style="border-radius: 8px; font-size: 12px; height: 100px;" required></textarea>
+                            <span asp-validation-for="NotamsReporte" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
                     </div>
 
+                    <!-- Closed Airport Simulation switch -->
+                    <div class="mb-4 bg-light p-3 rounded border" id="airportClosureSimulationPanel" style="display: none;">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="simulateClosureCheckbox">
+                            <label class="form-check-label fw-semibold text-danger" for="simulateClosureCheckbox">
+                                🚨 Simular Cierre de Pista en Aeropuerto Destino (Límite Operacional)
+                            </label>
+                            <small class="text-muted d-block" style="font-size: 11px;">
+                                Al activar esta casilla, se modificará el NOTAM de destino declarando el aeropuerto CERRADO. El sistema bloqueará el despacho por seguridad aérea.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Dispatcher and Remarks -->
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <label asp-for="DespachadorNombre" class="form-label fw-semibold">Nombre del Despachador Autorizado</label>
@@ -104,7 +257,7 @@
                         <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
                             Cancelar
                         </a>
-                        <button type="submit" class="btn btn-primary px-4" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
+                        <button type="submit" class="btn btn-primary px-4" id="submitBtn" style="background: linear-gradient(135deg, #0076ff 0%, #0056cc 100%); border: none; border-radius: 8px;">
                             Aprobar y Despachar
                         </button>
                     </div>
@@ -119,6 +272,191 @@
     
     <script>
         $(document).ready(function() {
+            let flightData = null;
+            let airportClosedSimulation = false;
+            
+            // Map table for IATA to ICAO
+            const icaoMap = {
+                'EZE': 'SAEZ',
+                'AEP': 'SABE',
+                'COR': 'SACO',
+                'FTE': 'SAWC',
+                'MAD': 'LEMD'
+            };
+
+            // Database of recommended routes based on (Origin - Destination) keys
+            const routeDatabase = {
+                'AEP-COR': [
+                    'AEP UT312 COR',
+                    'AEP UM540 ROS UT312 COR (Ruta Norte)',
+                    'AEP UW24 KASID UT312 COR (Ruta Clima)'
+                ],
+                'AEP-FTE': [
+                    'AEP UM540 VIE UW5 FTE (Directa)',
+                    'AEP UW10 CRV UW5 FTE (Costa Atlántica)'
+                ],
+                'EZE-MAD': [
+                    'EZE UT100 NTL UA302 KANAR UA300 MAD (Estándar Transatlántica)',
+                    'EZE UT100 NTL UA302 LIS UA300 MAD (Alterno Lisboa)'
+                ]
+            };
+
+            function parseIataCode(airportText) {
+                if (!airportText) return '';
+                const match = airportText.match(/\b([A-Z]{3})\b/);
+                return match ? match[1] : '';
+            }
+
+            function generateMetarString(iata) {
+                const icao = icaoMap[iata] || (iata ? 'SA' + iata.substring(0, 2) : 'SAEZ');
+                const now = new Date();
+                const datePart = String(now.getDate()).padStart(2, '0');
+                const hourPart = String(now.getUTCHours()).padStart(2, '0');
+                
+                const windDir = String(Math.floor(Math.random() * 36) * 10).padStart(3, '0');
+                const windSpeed = Math.floor(Math.random() * 15) + 4;
+                
+                const cloudsArr = ['FEW025', 'SCT030', 'BKN040', 'SKC'];
+                const clouds = cloudsArr[Math.floor(Math.random() * cloudsArr.length)];
+                
+                const temp = Math.floor(Math.random() * 12) + 12;
+                const dp = temp - Math.floor(Math.random() * 5);
+                const qnh = Math.floor(Math.random() * 10) + 1010;
+                
+                return `${icao} ${datePart}${hourPart}00Z ${windDir}${windSpeed}KT 9999 ${clouds} ${temp}/${dp} Q${qnh}`;
+            }
+
+            function generateDefaultNotams(originIata, destIata) {
+                const originIcao = icaoMap[originIata] || 'SABE';
+                const destIcao = icaoMap[destIata] || 'SACO';
+                
+                return `${originIcao} (IATA: ${originIata}): ILS CAT II RWY 13 OPERATIONAL. RADAR SERVICES NORMAL.\n` +
+                       `${destIcao} (IATA: ${destIata}): TAXIWAY ALPHA WIP LIGHTS OFF. ALL SYSTEMS NORMAL.`;
+            }
+
+            function calculateWeightAndCheckClosure() {
+                if (!flightData) {
+                    $('#weightCalcCard').hide();
+                    return;
+                }
+
+                $('#weightCalcCard').show();
+                const oew = parseFloat(flightData.pesoVacio);
+                const mtow = parseFloat(flightData.pesoMaximoDespegue);
+                
+                const fuel = parseFloat($('#fuelInput').val()) || 0;
+                const payload = parseFloat($('#payloadInput').val()) || 0;
+                const tow = oew + fuel + payload;
+
+                // Calculate raw MAC to plot real position
+                let rawMac = 22.0 + (payload / 1000.0) * 0.35 - (fuel / 1000.0) * 0.12;
+
+                // Clamp MAC for numerical inputs
+                let mac = rawMac;
+                if (mac < 15.0) mac = 15.0;
+                if (mac > 35.0) mac = 35.0;
+
+                // Calculate Trim (typical linear formula)
+                let trim = 7.0 - ((mac - 15.0) / 20.0) * 3.5;
+
+                // Render values
+                $('#oewVal').text(oew.toLocaleString());
+                $('#payloadVal').text(payload.toLocaleString());
+                $('#fuelVal').text(fuel.toLocaleString());
+                $('#towVal').text(tow.toLocaleString());
+                $('#mtowVal').text(mtow.toLocaleString());
+                $('#cgVal').text(rawMac.toFixed(1));
+                $('#trimVal').text(trim.toFixed(1));
+
+                // ProgressBar percentage
+                const pct = Math.min((tow / mtow) * 100, 100);
+                $('#towProgressBar').css('width', pct + '%');
+
+                // Coordinate calculations for the SVG Envelope Chart
+                // X mapping: 10% to 40% (delta = 30%). Grid range: 40px to 240px.
+                let xPercent = (rawMac - 10.0) / 30.0;
+                let cx = 40.0 + xPercent * 200.0;
+                // Clamp coordinates within SVG container margins
+                if (cx < 20.0) cx = 20.0;
+                if (cx > 260.0) cx = 260.0;
+
+                // Y mapping: OEW to MTOW. Grid range: 125px to 15px.
+                let yRange = mtow - oew;
+                let yPercent = yRange > 0 ? (tow - oew) / yRange : 0.5;
+                let cy = 125.0 - yPercent * 110.0;
+                if (cy < 10.0) cy = 10.0;
+                if (cy > 140.0) cy = 140.0;
+
+                // Safety check evaluations
+                let isOverweight = (tow > mtow);
+                let isUnbalanced = (rawMac < 15.0 || rawMac > 35.0);
+
+                // Dot color depending on limits
+                let dotColor = '#10b981'; // Green
+                if (isOverweight || isUnbalanced) {
+                    dotColor = '#ef4444'; // Red
+                } else if (pct > 90 || rawMac < 17.0 || rawMac > 33.0) {
+                    dotColor = '#f59e0b'; // Yellow/Orange
+                }
+
+                // Move and update the SVG CG Dot
+                $('#cgDot').attr('cx', cx).attr('cy', cy).attr('fill', dotColor);
+
+                // Color classes and safety alert box logic
+                const alertBox = $('#weightAlertBox');
+                const title = $('#weightStatusTitle');
+                const desc = $('#weightStatusDesc');
+                const submitBtn = $('#submitBtn');
+                
+                $('#towProgressBar').removeClass('bg-success bg-warning bg-danger');
+
+                // Check first if airport is closed (priority 1 safety lock)
+                if (airportClosedSimulation) {
+                    $('#towProgressBar').addClass('bg-danger');
+                    alertBox.css({ 'background-color': 'rgba(239, 68, 68, 0.14)', 'color': '#ef4444' });
+                    title.text('❌ DESPACHO RECHAZADO');
+                    desc.html(`<strong>Aeropuerto de destino cerrado.</strong> NOTAM de seguridad prohíbe el aterrizaje.`);
+                    submitBtn.prop('disabled', true);
+                }
+                else if (isOverweight) {
+                    // Overweight
+                    $('#towProgressBar').addClass('bg-danger');
+                    alertBox.css({ 'background-color': 'rgba(239, 68, 68, 0.1)', 'color': '#ef4444' });
+                    title.text('❌ ALERTA: SOBREPESO');
+                    desc.html(`<strong>Sobrepeso crítico.</strong> Exceso de peso por ${(tow - mtow).toLocaleString()} kg. <br /><strong>Por favor, reduzca el peso de la carga o del combustible para poder despachar.</strong>`);
+                    submitBtn.prop('disabled', true);
+                }
+                else if (isUnbalanced) {
+                    // Unbalanced
+                    $('#towProgressBar').addClass('bg-danger');
+                    alertBox.css({ 'background-color': 'rgba(239, 68, 68, 0.1)', 'color': '#ef4444' });
+                    title.text('❌ ALERTA: NO BALANCEADO');
+                    desc.html(`<strong>Aeronave desbalanceada.</strong> Centro de Gravedad (${rawMac.toFixed(1)}% MAC) fuera de los límites de seguridad (15% - 35%). <br /><strong>Por favor, baje el peso de la carga o del combustible para restablecer el balance.</strong>`);
+                    submitBtn.prop('disabled', true);
+                }
+                else if (pct > 90) {
+                    // Warning (Close to MTOW)
+                    $('#towProgressBar').addClass('bg-warning');
+                    alertBox.css({ 'background-color': 'rgba(245, 158, 11, 0.1)', 'color': '#f59e0b' });
+                    title.text('⚠️ PESO LÍMITE (>90%)');
+                    desc.text(`Margen disponible: ${(mtow - tow).toLocaleString()} kg. CG: ${rawMac.toFixed(1)}% MAC.`);
+                    submitBtn.prop('disabled', false);
+                } else {
+                    // Safe
+                    $('#towProgressBar').addClass('bg-success');
+                    alertBox.css({ 'background-color': 'rgba(16, 185, 129, 0.1)', 'color': '#10b981' });
+                    title.text('✅ PESO Y BALANCEO OK');
+                    desc.text(`Margen disponible: ${(mtow - tow).toLocaleString()} kg. CG: ${rawMac.toFixed(1)}% MAC.`);
+                    submitBtn.prop('disabled', false);
+                }
+            }
+
+            // Trigger W&B calculation on typing
+            $('.weight-input').on('input change', function() {
+                calculateWeightAndCheckClosure();
+            });
+
+            // Handle flight selection
             $('#vueloSelect').change(function() {
                 var flightId = $(this).val();
                 if (flightId) {
@@ -127,22 +465,186 @@
                         type: 'GET',
                         success: function(data) {
                             if (data) {
+                                flightData = data;
+                                
+                                // Update flight details visual box
                                 var html = '<div class="p-2 border rounded bg-white" style="font-size: 13px;">' +
                                     '<strong>Matrícula:</strong> ' + data.matricula + ' (' + data.modelo + ')<br />' +
+                                    '<strong>Comandante:</strong> ' + data.piloto + '<br />' +
                                     '<strong>Ruta:</strong> ' + data.origen + ' a ' + data.destino + '<br />' +
                                     '<strong>Salida:</strong> ' + data.salida +
                                     '</div>';
                                 $('#flightInfoPanel').html(html);
+                                
+                                // Enable metar, notam buttons and show simulator
+                                $('#metarBtn').prop('disabled', false);
+                                $('#notamBtn').prop('disabled', false);
+                                $('#airportClosureSimulationPanel').show();
+                                
+                                // Render Recommended Route Suggestions
+                                const originIata = parseIataCode(data.origen);
+                                const destIata = parseIataCode(data.destino);
+                                const routeKey = `${originIata}-${destIata}`;
+                                const suggestedRoutes = routeDatabase[routeKey];
+                                
+                                if (suggestedRoutes && suggestedRoutes.length > 0) {
+                                    $('#routeSuggestionsPanel').show();
+                                    let listHtml = '';
+                                    suggestedRoutes.forEach(function(route) {
+                                        listHtml += `<button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 fw-semibold btn-route-suggest" data-route="${route}" style="font-size:11px; border-radius:6px;">${route}</button>`;
+                                    });
+                                    $('#routeSuggestionsList').html(listHtml);
+                                } else {
+                                    $('#routeSuggestionsPanel').hide();
+                                }
+                                
+                                // Clean up simulator state when switching flight
+                                $('#simulateClosureCheckbox').prop('checked', false);
+                                airportClosedSimulation = false;
+                                
+                                // Update/Show weight calculator
+                                calculateWeightAndCheckClosure();
                             }
                         },
                         error: function() {
                             $('#flightInfoPanel').html('<div class="text-danger py-2" style="font-size: 13px;">Error al obtener itinerario.</div>');
+                            $('#metarBtn').prop('disabled', true);
+                            $('#notamBtn').prop('disabled', true);
+                            $('#routeSuggestionsPanel').hide();
+                            $('#airportClosureSimulationPanel').hide();
+                            flightData = null;
+                            calculateWeightAndCheckClosure();
                         }
                     });
                 } else {
                     $('#flightInfoPanel').html('<div class="text-muted py-2" style="font-size: 13px;">Seleccione un vuelo para visualizar sus datos de itinerario y aeronave.</div>');
+                    $('#metarBtn').prop('disabled', true);
+                    $('#notamBtn').prop('disabled', true);
+                    $('#routeSuggestionsPanel').hide();
+                    $('#airportClosureSimulationPanel').hide();
+                    flightData = null;
+                    calculateWeightAndCheckClosure();
                 }
             });
+
+            // Route suggestion click handler
+            $(document).on('click', '.btn-route-suggest', function() {
+                const fullRoute = $(this).attr('data-route');
+                // Extract just the route part before descriptions in parentheses
+                const cleanRoute = fullRoute.split(' (')[0];
+                $('#rutaInput').val(cleanRoute);
+            });
+
+            // Fetch Meteorological Data from C# proxy
+            $('#metarBtn').click(function() {
+                if (!flightData) return;
+                
+                const originIata = parseIataCode(flightData.origen);
+                const destIata = parseIataCode(flightData.destino);
+                
+                const originIcao = icaoMap[originIata] || 'SABE';
+                const destIcao = icaoMap[destIata] || 'SACO';
+
+                $('#metarInput').val("Consultando clima real en base de datos NOAA...");
+
+                // Call C# NOAA Proxy for Origin
+                $.ajax({
+                    url: '@Url.Action("GetRealMetar", "Despachos")' + '?icao=' + originIcao,
+                    type: 'GET',
+                    success: function(originResult) {
+                        let finalMetar = '';
+                        if (originResult.success) {
+                            finalMetar += originResult.metar + ';\n';
+                        } else {
+                            finalMetar += generateMetarString(originIata) + ' (Simulado);\n';
+                        }
+
+                        // Call C# NOAA Proxy for Destination
+                        $.ajax({
+                            url: '@Url.Action("GetRealMetar", "Despachos")' + '?icao=' + destIcao,
+                            type: 'GET',
+                            success: function(destResult) {
+                                if (destResult.success) {
+                                    finalMetar += destResult.metar;
+                                } else {
+                                    finalMetar += generateMetarString(destIata) + ' (Simulado)';
+                                }
+                                $('#metarInput').val(finalMetar);
+                            },
+                            error: function() {
+                                finalMetar += generateMetarString(destIata) + ' (Simulado)';
+                                $('#metarInput').val(finalMetar);
+                            }
+                        });
+                    },
+                    error: function() {
+                        const finalMetar = generateMetarString(originIata) + ' (Simulado);\n' + generateMetarString(destIata) + ' (Simulado)';
+                        $('#metarInput').val(finalMetar);
+                    }
+                });
+            });
+
+            // Generate default NOTAMs click
+            $('#notamBtn').click(function() {
+                if (!flightData) return;
+                const originIata = parseIataCode(flightData.origen);
+                const destIata = parseIataCode(flightData.destino);
+                
+                const defaultNotams = generateDefaultNotams(originIata, destIata);
+                $('#notamInput').val(defaultNotams);
+                
+                // If checkbox is active, reinforce closed status in text
+                if ($('#simulateClosureCheckbox').is(':checked')) {
+                    $('#simulateClosureCheckbox').trigger('change');
+                }
+            });
+
+            // Airport closure simulation checkbox listener
+            $('#simulateClosureCheckbox').change(function() {
+                if (!flightData) return;
+                
+                const destIata = parseIataCode(flightData.destino);
+                const destIcao = icaoMap[destIata] || 'SACO';
+                
+                let currentNotams = $('#notamInput').val() || '';
+                
+                if (this.checked) {
+                    airportClosedSimulation = true;
+                    // Add runway closure NOTAM text
+                    const closureText = `\n${destIcao} (IATA: ${destIata}): NOTAM B0842/26 - AD CLSD RWY 11/29 CLOSED DUE TO MAINTENANCE WIP. ALL OPERATIONS SUSPENDED.`;
+                    
+                    // Prevent appending twice
+                    if (!currentNotams.includes("AD CLSD RWY")) {
+                        $('#notamInput').val(currentNotams + closureText);
+                    }
+                } else {
+                    airportClosedSimulation = false;
+                    // Remove runway closure NOTAM text if present
+                    const cleanText = currentNotams.split('\n').filter(function(line) {
+                        return !line.includes("AD CLSD RWY") && !line.includes("CLOSED DUE TO");
+                    }).join('\n');
+                    $('#notamInput').val(cleanText);
+                }
+                
+                calculateWeightAndCheckClosure();
+            });
+
+            // Initial trigger if loading page with pre-selected flightId
+            if ($('#vueloSelect').val()) {
+                $('#vueloSelect').trigger('change');
+            }
         });
     </script>
 }
+
+
+
+
+
+
+
+
+
+
+
+
