@@ -672,11 +672,13 @@
                 ctx.lineCap = "round";
                 ctx.lineJoin = "round";
 
-                function getMousePos(canvasDom, mouseEvent) {
+                function getMousePos(canvasDom, touchOrMouseEvent) {
                     const rect = canvasDom.getBoundingClientRect();
+                    const clientX = touchOrMouseEvent.touches ? touchOrMouseEvent.touches[0].clientX : touchOrMouseEvent.clientX;
+                    const clientY = touchOrMouseEvent.touches ? touchOrMouseEvent.touches[0].clientY : touchOrMouseEvent.clientY;
                     return {
-                        x: mouseEvent.clientX - rect.left,
-                        y: mouseEvent.clientY - rect.top
+                        x: clientX - rect.left,
+                        y: clientY - rect.top
                     };
                 }
 
@@ -696,6 +698,40 @@
 
                 dispatcherCanvas.addEventListener("mouseup", () => drawing = false);
                 dispatcherCanvas.addEventListener("mouseleave", () => drawing = false);
+
+                // Touch support
+                dispatcherCanvas.addEventListener("touchstart", function (e) {
+                    if (e.target === dispatcherCanvas) {
+                        e.preventDefault();
+                    }
+                    drawing = true;
+                    const pos = getMousePos(dispatcherCanvas, e);
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y);
+                }, { passive: false });
+
+                dispatcherCanvas.addEventListener("touchmove", function (e) {
+                    if (e.target === dispatcherCanvas) {
+                        e.preventDefault();
+                    }
+                    if (!drawing) return;
+                    const pos = getMousePos(dispatcherCanvas, e);
+                    ctx.lineTo(pos.x, pos.y);
+                    ctx.stroke();
+                }, { passive: false });
+
+                dispatcherCanvas.addEventListener("touchend", function (e) {
+                    drawing = false;
+                });
+
+                const btnLimpiarDespachador = document.getElementById("btnLimpiarDespachador");
+                if (btnLimpiarDespachador) {
+                    btnLimpiarDespachador.addEventListener("click", function () {
+                        ctx.clearRect(0, 0, dispatcherCanvas.width, dispatcherCanvas.height);
+                        document.getElementById("firmaDespachadorBase64").value = "";
+                    });
+                }
+
             }
 
             // Initial trigger if loading page with pre-selected flightId
