@@ -25,6 +25,7 @@
                             <th class="py-3" style="color: #64748b; font-weight: 600;">Salida</th>
                             <th class="py-3" style="color: #64748b; font-weight: 600;">Llegada</th>
                             <th class="py-3" style="color: #64748b; font-weight: 600;">Aeronave</th>
+                            <th class="py-3" style="color: #64748b; font-weight: 600;">Comandante</th>
                             <th class="py-3" style="color: #64748b; font-weight: 600;">Estado</th>
                             <th class="py-3 text-end px-4" style="color: #64748b; font-weight: 600; width: 180px;">Acciones</th>
                         </tr>
@@ -59,6 +60,17 @@
                                         else
                                         {
                                             <span class="text-danger">No asignada</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Piloto != null)
+                                        {
+                                            <span class="fw-semibold text-primary">@item.Piloto.NombreCompleto</span>
+                                            <span class="text-muted d-block" style="font-size: 11px;">@@@item.Piloto.NombreUsuario</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No asignado</span>
                                         }
                                     </td>
                                     <td>

@@ -60,7 +60,7 @@
                     </div>
 
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-6 mb-3">
                             <label asp-for="Estado" class="form-label fw-semibold">Estado del Vuelo</label>
                             <select asp-for="Estado" class="form-select" style="border-radius: 8px;">
                                 <option value="Programado">Programado</option>
@@ -69,6 +69,14 @@
                                 <option value="Cancelado">Cancelado</option>
                             </select>
                             <span asp-validation-for="Estado" class="text-danger" style="font-size: 12px;"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PilotoId" class="form-label fw-semibold">Comandante (Piloto)</label>
+                            <select asp-for="PilotoId" class="form-select" asp-items="ViewBag.PilotoId" style="border-radius: 8px;" required>
+                                <option value="">-- Seleccionar Comandante --</option>
+                            </select>
+                            <span asp-validation-for="PilotoId" class="text-danger" style="font-size: 12px;"></span>
                         </div>
                     </div>
 

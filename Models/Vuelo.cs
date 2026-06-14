@@ -36,5 +36,10 @@ namespace despachoAeronave.Models
 
         [ForeignKey("AeronaveId")]
         public Aeronave? Aeronave { get; set; }
+
+        public int? PilotoId { get; set; }
+
+        [ForeignKey("PilotoId")]
+        public Usuario? Piloto { get; set; }
     }
 }
