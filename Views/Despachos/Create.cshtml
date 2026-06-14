@@ -661,6 +661,43 @@
                 
                 calculateWeightAndCheckClosure();
             });
+            // Dispatcher Signature Canvas Logic
+            const dispatcherCanvas = document.getElementById("firmaDespachadorCanvas");
+            if (dispatcherCanvas) {
+                const ctx = dispatcherCanvas.getContext("2d");
+                let drawing = false;
+
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+
+                function getMousePos(canvasDom, mouseEvent) {
+                    const rect = canvasDom.getBoundingClientRect();
+                    return {
+                        x: mouseEvent.clientX - rect.left,
+                        y: mouseEvent.clientY - rect.top
+                    };
+                }
+
+                dispatcherCanvas.addEventListener("mousedown", function (e) {
+                    drawing = true;
+                    const pos = getMousePos(dispatcherCanvas, e);
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y);
+                });
+
+                dispatcherCanvas.addEventListener("mousemove", function (e) {
+                    if (!drawing) return;
+                    const pos = getMousePos(dispatcherCanvas, e);
+                    ctx.lineTo(pos.x, pos.y);
+                    ctx.stroke();
+                });
+
+                dispatcherCanvas.addEventListener("mouseup", () => drawing = false);
+                dispatcherCanvas.addEventListener("mouseleave", () => drawing = false);
+            }
+
             // Initial trigger if loading page with pre-selected flightId
             if ($('#vueloSelect').val()) {
                 $('#vueloSelect').trigger('change');
