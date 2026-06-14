@@ -194,7 +194,7 @@ namespace despachoAeronave.Controllers
 
             despacho.EstaAprobadoPorPiloto = true;
             despacho.FechaFirmaPiloto = DateTime.Now;
-            
+            despacho.FirmaPilotoBase64 = firmaBase64;
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = despacho.Id });
