@@ -33,7 +33,7 @@ namespace despachoAeronave.Controllers
         // POST: Aeronaves/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Matricula,Modelo,CapacidadPasajeros,Estado")] Aeronave aeronave)
+        public async Task<IActionResult> Create([Bind("Matricula,Modelo,CapacidadPasajeros,Estado,PesoMaximoDespegue,PesoVacio")] Aeronave aeronave)
         {
             if (ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace despachoAeronave.Controllers
         // POST: Aeronaves/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Matricula,Modelo,CapacidadPasajeros,Estado")] Aeronave aeronave)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Matricula,Modelo,CapacidadPasajeros,Estado,PesoMaximoDespegue,PesoVacio")] Aeronave aeronave)
         {
             if (id != aeronave.Id) return NotFound();
 
@@ -112,3 +112,9 @@ namespace despachoAeronave.Controllers
         }
     }
 }
+
+
+
+
+
+
